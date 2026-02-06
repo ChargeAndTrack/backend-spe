@@ -1,0 +1,8 @@
+{
+  "name": "backend-spe",
+  "version": "0.1.0",
+  "description": "Backend for the SPE project.",
+  "devDependencies": {
+    "semantic-release-preconfigured-conventional-commits": "latest"
+  }
+}
