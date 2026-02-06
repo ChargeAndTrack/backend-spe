@@ -1,0 +1,29 @@
+name: Build
+
+on:
+  workflow_call:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up Docker
+        uses: docker/setup-docker-action@v4
+      - name: Gradle build
+        run: |
+          chmod +x ./gradlew
+          ./gradlew build
+
+  success:
+    needs:
+      - build
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify there are no failures
+        run: ${{ !contains(join(needs.*.result, ','), 'failure') }}
