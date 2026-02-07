@@ -12,14 +12,14 @@ repositories {
     mavenCentral()
 }
 
+dependencies {
+    implementation("io.ktor:ktor-server-core")
+    implementation("io.ktor:ktor-server-netty")
+    implementation(platform("org.mongodb:mongodb-driver-bom:5.6.1"))
+    implementation("org.mongodb:mongodb-driver-kotlin-coroutine")
+    implementation("org.mongodb:bson-kotlinx")
+}
+
 kotlin {
     jvmToolchain(21)
-    sourceSets {
-        val main by getting {
-            dependencies {
-                implementation("io.ktor:ktor-server-core")
-                implementation("io.ktor:ktor-server-netty")
-            }
-        }
-    }
 }
