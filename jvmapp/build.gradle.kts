@@ -5,7 +5,13 @@ plugins {
 }
 
 application {
-    mainClass = "App.kt" 
+    mainClass = "infrastructure.AppKt"
+}
+
+ktor {
+    fatJar {
+        archiveFileName.set("jvmapp.jar")
+    }
 }
 
 repositories {
