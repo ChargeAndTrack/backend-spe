@@ -1,0 +1,43 @@
+services:
+  jvmapp:
+    build:
+      context: .
+      dockerfile: ./jvmapp/Dockerfile
+    image: jvmapp
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    networks:
+      - esterna
+      - interna
+
+  mongodb:
+    build:
+      context: ./mongodb
+      dockerfile: Dockerfile
+    image: mymongo
+    command: [ "docker-entrypoint.sh", "mongod" ]
+    restart: always
+    healthcheck:
+      test: |
+        host=`hostname --ip-address || echo '127.0.0.1'`;
+        mongo --quiet $${host}/test --eval 'quit(db.runCommand({ ping: 1 }).ok ? 0 : 2)' && echo 0 || echo 1
+      interval: 5s
+    networks:
+      - interna
+
+networks:
+  interna:
+    driver: bridge
+    internal: true
+    driver_opts:
+       com.docker.network.bridge.name: "br-interna89012" 
+       com.docker.network.enable_ipv6: "false"
+  esterna:
+    driver: bridge
+    internal: false
+    driver_opts:
+       com.docker.network.bridge.name: "br-esterna89012" 
+       com.docker.network.enable_ipv6: "false"
