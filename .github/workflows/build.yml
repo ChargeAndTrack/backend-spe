@@ -12,12 +12,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Give permission to gradle wrapper
+        run: chmod +x ./gradlew
       - name: Set up Docker
         uses: docker/setup-docker-action@v4
-      - name: Gradle build
-        run: |
-          chmod +x ./gradlew
-          ./gradlew build
+      - name: Docker compose
+        run: docker compose build
 
   success:
     needs:
