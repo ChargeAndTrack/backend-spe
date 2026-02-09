@@ -16,3 +16,4 @@ gitHooks {
 }
 
 rootProject.name = "ChargeAndTrack"
+include("jvmapp")
