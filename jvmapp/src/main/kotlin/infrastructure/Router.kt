@@ -2,6 +2,7 @@ package infrastructure
 
 import infrastructure.user.UserController
 import io.ktor.server.application.*
+import io.ktor.server.auth.authenticate
 import io.ktor.server.routing.*
 
 object Router {
@@ -9,7 +10,9 @@ object Router {
         routing {
             route("/api/v1") {
                 post("/login") { UserController.login(call) }
-                get("/user") { UserController.getUser(call) }
+                authenticate("auth-jwt") {
+                    get("/user") { UserController.getUser(call) }
+                }
             }
         }
     }

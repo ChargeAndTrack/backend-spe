@@ -17,28 +17,22 @@ class UserRepositoryImpl : UserRepository {
     private val users = MongoDb.database.getCollection<UserDbEntity>("users")
 
     override suspend fun findUser(username: String, password: String): User {
-        try {
-            return (
-                    users
-                        .find(
-                            and(
-                                eq<String>("username", username),
-                                eq<String>("password", password)
-                            )
-                        ).firstOrNull()
-                        ?: throw IllegalArgumentException(USER_NOT_FOUND_MESSAGE)
-            ).toDomain()
-        } catch (e: Exception) {
-            println("Exception: " + e.toString())
-            println(e.printStackTrace())
-            throw e
-        }
+        return (
+                users
+                    .find(
+                        and(
+                            eq<String>("username", username),
+                            eq<String>("password", password)
+                        )
+                    ).firstOrNull()
+                    ?: throw IllegalArgumentException(USER_NOT_FOUND_MESSAGE)
+        ).toDomain()
     }
 
     override suspend fun getUser(userId: String): User {
         return (
             users
-                .find(eq<String>("_id", userId))
+                .find(eq<ObjectId>("_id", ObjectId(userId)))
                 .firstOrNull()
                 ?: throw IllegalArgumentException(USER_NOT_FOUND_MESSAGE)
         ).toDomain()
@@ -66,7 +60,7 @@ class UserRepositoryImpl : UserRepository {
             id = ObjectId(id),
             username = username,
             password = password,
-            role = role.name,
+            role = role.displayName,
             cars = cars.map { it.toDbEntity() }
         )
 
