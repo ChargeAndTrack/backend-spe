@@ -1,0 +1,96 @@
+openapi: 3.0.3
+info:
+  title: "ChargeAndTrack"
+  description: This is the API of ChargeAndTrack
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+  - url: https://0.0.0.0:3000/api/v1
+tags:
+  - name: account
+    description: User account
+  - name: car
+    description: Car
+
+paths:
+  /login:
+    post:
+      tags:
+        - account
+      description: User login
+      operationId: login
+      requestBody:
+        description: user credentials
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: user successfully logged in
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  role:
+                    description: user role
+                    type: string
+                  token:
+                    description: authorization token
+                    type: string
+
+  /user:
+    get:
+      tags:
+        - account
+      description: Get user information
+      operationId: getUser
+      responses:
+        '200':
+          description: user information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: user not found
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+        cars:
+          type: array
+          items:
+            $ref: '#/components/schemas/Car'
+    Car:
+      type: object
+      properties:
+        _id:
+          type: string
+        plate:
+          type: string
+        maxBattery:
+          type: number
+        currentBattery:
+          type: number
+        currentChargingStationId:
+          type: string
