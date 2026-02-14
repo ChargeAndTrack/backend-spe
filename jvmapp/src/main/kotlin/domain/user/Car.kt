@@ -1,4 +1,4 @@
-package domain
+package domain.user
 
 interface Car {
     val id: String

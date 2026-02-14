@@ -1,4 +1,4 @@
-package domain
+package domain.user
 
 interface User {
     val id: String
