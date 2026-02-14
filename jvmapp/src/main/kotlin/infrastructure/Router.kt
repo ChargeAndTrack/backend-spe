@@ -6,7 +6,9 @@ import io.ktor.server.routing.*
 object Router {
     val module: Application.() -> Unit = {
         routing {
-            get("/user") { UserController.getUser(call) }
+            route("/api/v1") {
+                get("/user") { UserController.getUser(call) }
+            }
         }
     }
 }
