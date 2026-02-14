@@ -38,6 +38,18 @@ class Server(port: Int, routing: Application.() -> Unit) {
                     call.respond(HttpStatusCode.Unauthorized, "Token is not valid or has expired")
                 }
             }
+            jwt("auth-admin") {
+                verifier(JWT.require(Algorithm.HMAC256(Config.jwtSecret)).build())
+                validate { credential ->
+                    println("Role: ${credential.payload.getClaim("userRole").asString()}")
+                    if (credential.payload.getClaim("userRole").asString() == "Admin") {
+                        JWTPrincipal(credential.payload)
+                    } else null
+                }
+                challenge { _, _ ->
+                    call.respond(HttpStatusCode.Unauthorized, "Token is not valid or has expired")
+                }
+            }
         }
         routing()
     }

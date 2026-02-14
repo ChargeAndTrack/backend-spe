@@ -13,6 +13,9 @@ object Router {
                 authenticate("auth-jwt") {
                     get("/user") { UserController.getUser(call) }
                 }
+                authenticate("auth-admin") {
+                    get("/admin") { UserController.getUser(call) }
+                }
             }
         }
     }
