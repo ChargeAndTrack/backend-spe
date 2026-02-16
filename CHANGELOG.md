@@ -1,3 +1,28 @@
+## [0.3.0](https://github.com/ChargeAndTrack/backend-spe/compare/0.2.0...0.3.0) (2026-02-16)
+
+### Features
+
+* **login:** add authentication with JWT, application.conf and UserDTO ([6780101](https://github.com/ChargeAndTrack/backend-spe/commit/6780101c44aac50ce6878a3a8c1617da0fc5ec51))
+* **login:** add UserService, UserRepository and implementations, add user domain implementations and add login route, handler and DTOs ([81c32b4](https://github.com/ChargeAndTrack/backend-spe/commit/81c32b40f41cae89364593f48d77cfc0d3d9cbc9))
+* **login:** add verify admin role as JWT configuration ([0e17f52](https://github.com/ChargeAndTrack/backend-spe/commit/0e17f5219901a16896a76eaf00c7c0e71869a6d8))
+
+### Bug Fixes
+
+* **deps:** add serialization dependency and plugin, add and install server content negotiation ([7f37dbd](https://github.com/ChargeAndTrack/backend-spe/commit/7f37dbdad54fb8f620eddc20fd84953292ba5bd6))
+
+### Documentation
+
+* add openapi ([2e2585b](https://github.com/ChargeAndTrack/backend-spe/commit/2e2585b496698a0de8ad6b8eaa92c75c668b7054))
+
+### Build and continuous integration
+
+* add ktor authentication dependencies ([f736f00](https://github.com/ChargeAndTrack/backend-spe/commit/f736f0038161cb4138e41a51d2707e1e41230d6f))
+
+### Refactoring
+
+* move ktor deployment values in application.conf, extract extension function for jwt configuration ([54312c9](https://github.com/ChargeAndTrack/backend-spe/commit/54312c977cd9b1260c828cd531015c679bcb6bcb))
+* move user domain in user package ([d2fa1bd](https://github.com/ChargeAndTrack/backend-spe/commit/d2fa1bd34378d696bc87900bff42c6e0ee712a1c))
+
 ## [0.2.0](https://github.com/ChargeAndTrack/backend-spe/compare/0.1.0...0.2.0) (2026-02-09)
 
 ### Features
