@@ -8,7 +8,7 @@ import io.ktor.server.routing.*
 object Router {
     val module: Application.() -> Unit = {
         routing {
-            route("/api/v1") {
+            route(Config.rootPath ?: "api/v1") {
                 post("/login") { UserController.login(call) }
                 authenticate("auth-jwt") {
                     get("/user") { UserController.getUser(call) }
