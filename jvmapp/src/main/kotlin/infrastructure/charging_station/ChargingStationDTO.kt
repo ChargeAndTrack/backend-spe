@@ -17,3 +17,9 @@ data class LocationDTO(
     val longitude: Double,
     val latitude: Double
 )
+
+@Serializable
+data class AddChargingStationDTO(
+    val power: Int,
+    val location: LocationDTO
+)
