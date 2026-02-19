@@ -1,4 +1,4 @@
-package domain
+package domain.charging_station
 
 import domain.user.Car
 
