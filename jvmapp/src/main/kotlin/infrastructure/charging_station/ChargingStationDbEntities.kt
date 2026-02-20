@@ -1,5 +1,9 @@
 package infrastructure.charging_station
 
+import domain.charging_station.ChargingStation
+import domain.charging_station.ChargingStationImpl
+import domain.charging_station.Location
+import domain.charging_station.LocationImpl
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -20,4 +24,30 @@ data class ChargingStationDbEntity(
 data class LocationDbEntity(
     val longitude: Double,
     val latitude: Double
+)
+
+fun ChargingStation.toDbEntity(): ChargingStationDbEntity = ChargingStationDbEntity(
+    id = ObjectId(),
+    power = power,
+    available = available,
+    enabled = enabled,
+    location = location.toDbEntity()
+)
+
+fun ChargingStationDbEntity.toDomain(): ChargingStation = ChargingStationImpl(
+    id = id.toString(),
+    power = power,
+    available = available,
+    enabled = enabled,
+    location = location.toDomain()
+)
+
+fun Location.toDbEntity(): LocationDbEntity = LocationDbEntity(
+    longitude = longitude,
+    latitude = latitude
+)
+
+fun LocationDbEntity.toDomain(): Location = LocationImpl(
+    longitude = longitude,
+    latitude = latitude
 )
