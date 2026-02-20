@@ -1,10 +1,6 @@
 package infrastructure.charging_station
 
 import application.charging_station.ChargingStationServiceImpl
-import domain.charging_station.ChargingStation
-import domain.charging_station.ChargingStationImpl
-import domain.charging_station.Location
-import domain.charging_station.LocationImpl
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.receive
@@ -46,36 +42,4 @@ object ChargingStationsController {
             call.respond(HttpStatusCode.InternalServerError, SERVER_ERROR_MESSAGE)
         }
     }
-
-    private fun ChargingStation.toDTO(): ChargingStationDTO = ChargingStationDTO(
-        _id = id,
-        power = power,
-        available = available,
-        enabled = enabled,
-        location = location.toDTO()
-    )
-
-    private fun Location.toDTO(): LocationDTO = LocationDTO(
-        longitude = longitude,
-        latitude = latitude
-    )
-
-    private fun ChargingStationDTO.toDomain(): ChargingStation = ChargingStationImpl(
-        id = _id ?: "",
-        power = power,
-        available = available,
-        enabled = enabled,
-        location = location.toDomain()
-    )
-
-    private fun LocationDTO.toDomain(): Location = LocationImpl(
-        longitude = longitude,
-        latitude = latitude
-    )
-
-    private fun AddChargingStationDTO.toCompleteDTO(): ChargingStationDTO = ChargingStationDTO(
-        _id = null,
-        power = power,
-        location = location
-    )
 }
