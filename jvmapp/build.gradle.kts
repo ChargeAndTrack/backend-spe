@@ -33,10 +33,15 @@ dependencies {
     implementation("org.mongodb:mongodb-driver-kotlin-coroutine")
     implementation("org.mongodb:bson-kotlinx")
 
+    testImplementation(kotlin("test"))
     testImplementation("io.kotest:kotest-runner-junit5-jvm:6.1.4")
     testImplementation("io.kotest:kotest-assertions-core-jvm:6.1.4")
     testImplementation("io.ktor:ktor-client-cio")
     testImplementation("io.ktor:ktor-client-content-negotiation")
+}
+
+kotlin {
+    jvmToolchain(21)
 }
 
 tasks.withType<Test>().configureEach {
@@ -46,8 +51,4 @@ tasks.withType<Test>().configureEach {
         events("passed", "skipped", "failed")
         showStandardStreams = true
     }
-}
-
-kotlin {
-    jvmToolchain(21)
 }
