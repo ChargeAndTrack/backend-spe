@@ -22,4 +22,9 @@ object Router {
             }
         }
     }
+
+    fun String.assemblePath(vararg paths: String): String = buildString {
+        append(this@assemblePath)
+        paths.forEach(this::append)
+    }
 }
