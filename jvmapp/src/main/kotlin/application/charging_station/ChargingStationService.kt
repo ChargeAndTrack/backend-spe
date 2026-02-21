@@ -5,7 +5,7 @@ import domain.charging_station.ChargingStation
 interface ChargingStationService {
     suspend fun listChargingStations(): Collection<ChargingStation>
 
-    suspend fun addChargingStation(chargingStationToAdd: ChargingStation): String
+    suspend fun addChargingStation(chargingStationToAdd: ChargingStation): ChargingStation?
 
     suspend fun getChargingStation(chargingStationId: String): ChargingStation
 

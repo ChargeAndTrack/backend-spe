@@ -31,13 +31,11 @@ object ChargingStationsController {
         try {
             val requestBody = call.receive<AddChargingStationDTO>()
             val chargingStationDTO = requestBody.toCompleteDTO()
-            this.chargingStationService.addChargingStation(chargingStationDTO.toDomain()).also {
-                if (it.isNotEmpty()) {
-                    call.respond(HttpStatusCode.Created, chargingStationDTO.copy(_id = it))
-                } else {
-                    call.respond(HttpStatusCode.BadRequest, "Invalid request data")
-                }
-            }
+            this.chargingStationService
+                .addChargingStation(chargingStationDTO.toDomain())
+                ?.let {
+                    call.respond(HttpStatusCode.Created, it.toDTO())
+                } ?: call.respond(HttpStatusCode.BadRequest, "Invalid request data")
         } catch (_: Exception) {
             call.respond(HttpStatusCode.InternalServerError, SERVER_ERROR_MESSAGE)
         }

@@ -6,7 +6,7 @@ class ChargingStationServiceImpl(val repository: ChargingStationRepository) : Ch
     override suspend fun listChargingStations(): Collection<ChargingStation> =
         this.repository.listChargingStations()
 
-    override suspend fun addChargingStation(chargingStationToAdd: ChargingStation): String =
+    override suspend fun addChargingStation(chargingStationToAdd: ChargingStation): ChargingStation? =
         this.repository.addChargingStation(chargingStationToAdd)
 
     override suspend fun getChargingStation(chargingStationId: String): ChargingStation =
