@@ -29,6 +29,10 @@ dependencies {
     implementation(platform("org.mongodb:mongodb-driver-bom:5.6.1"))
     implementation("org.mongodb:mongodb-driver-kotlin-coroutine")
     implementation("org.mongodb:bson-kotlinx")
+
+    testImplementation(kotlin("test"))
+    testImplementation("io.ktor:ktor-client-cio")
+    testImplementation("io.ktor:ktor-client-content-negotiation")
 }
 
 kotlin {
