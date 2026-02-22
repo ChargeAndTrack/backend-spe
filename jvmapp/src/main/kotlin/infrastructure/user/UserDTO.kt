@@ -18,3 +18,9 @@ data class CarDTO(
     var maxBattery: Int,
     var currentBattery: Int?
 )
+
+@Serializable
+data class AddCarDTO(
+    val plate: String,
+    val maxBattery: Int
+)
