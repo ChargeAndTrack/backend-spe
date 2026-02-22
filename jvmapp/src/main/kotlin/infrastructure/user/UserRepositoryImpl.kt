@@ -1,12 +1,11 @@
 package infrastructure.user
 
+import AddCarInput
 import application.user.UserRepository
 import com.mongodb.client.model.Filters.*
+import com.mongodb.client.model.Updates.*
 import domain.user.Car
-import domain.user.CarImpl
-import domain.user.Role
 import domain.user.User
-import domain.user.UserImpl
 import infrastructure.MongoDb
 import kotlinx.coroutines.flow.firstOrNull
 import org.bson.types.ObjectId
@@ -14,61 +13,56 @@ import org.bson.types.ObjectId
 class UserRepositoryImpl : UserRepository {
 
     private val USER_NOT_FOUND_MESSAGE = "User not found"
+
     private val users = MongoDb.database.getCollection<UserDbEntity>("users")
 
-    override suspend fun findUser(username: String, password: String): User {
-        return (
-                users
-                    .find(
-                        and(
-                            eq<String>("username", username),
-                            eq<String>("password", password)
-                        )
-                    ).firstOrNull()
-                    ?: throw IllegalArgumentException(USER_NOT_FOUND_MESSAGE)
-        ).toDomain()
+    override suspend fun findUser(username: String, password: String): User =
+        users
+            .find(
+                and(
+                    eq<String>("username", username),
+                    eq<String>("password", password)
+                )
+            ).firstOrNull()
+            ?.toDomain()
+            ?: throw IllegalArgumentException(USER_NOT_FOUND_MESSAGE)
+
+    private suspend fun getUserDbEntity(userId: String): UserDbEntity =
+        users
+            .find(eq<ObjectId>("_id", ObjectId(userId)))
+            .firstOrNull()
+            ?: throw IllegalArgumentException(USER_NOT_FOUND_MESSAGE)
+
+    override suspend fun getUser(userId: String): User = getUserDbEntity(userId).toDomain()
+
+    override suspend fun getCars(userId: String): Collection<Car> = getUser(userId).cars
+
+    override suspend fun addCar(userId: String, addCarInput: AddCarInput): Car {
+        val newCar = CarDbEntity(id = ObjectId(), plate = addCarInput.plate, maxBattery = addCarInput.maxBattery)
+        users
+            .updateOne(eq<ObjectId>("_id", ObjectId(userId)), push("cars", newCar))
+            .takeIf { it.matchedCount > 0 }
+            ?: throw IllegalArgumentException(USER_NOT_FOUND_MESSAGE)
+        return newCar.toDomain()
     }
 
-    override suspend fun getUser(userId: String): User {
-        return (
-            users
-                .find(eq<ObjectId>("_id", ObjectId(userId)))
-                .firstOrNull()
-                ?: throw IllegalArgumentException(USER_NOT_FOUND_MESSAGE)
-        ).toDomain()
+    override suspend fun getCar(userId: String, carId: String): Car {
+        TODO("Not yet implemented")
     }
 
-    private fun UserDbEntity.toDomain(): User =
-        UserImpl(
-            id = id.toString(),
-            username = username,
-            password = password,
-            role = Role.valueOf(role),
-            cars = cars.map { it.toDomain() }
-        )
+    override suspend fun updateCar(userId: String, carId: String): Car {
+        TODO("Not yet implemented")
+    }
 
-    private fun CarDbEntity.toDomain(): Car =
-        CarImpl(
-            id = id.toString(),
-            plate = plate,
-            maxBattery = maxBattery,
-            currentBattery = currentBattery
+    override suspend fun deleteCar(userId: String, carId: String): Collection<Car> {
+        users.updateOne(
+            eq<ObjectId>("_id", ObjectId(userId)),
+            pull("cars", eq<ObjectId>("_id", ObjectId(carId)))
         )
-
-    private fun User.toDbEntity(): UserDbEntity =
-        UserDbEntity(
-            id = ObjectId(id),
-            username = username,
-            password = password,
-            role = role.displayName,
-            cars = cars.map { it.toDbEntity() }
-        )
-
-    private fun Car.toDbEntity(): CarDbEntity =
-        CarDbEntity(
-            id = ObjectId(id),
-            plate = plate,
-            maxBattery = maxBattery,
-            currentBattery = currentBattery
-        )
+        val cars = getCars(userId)
+        if (cars.any { it.id == carId }) {
+            throw IllegalStateException("Couldn't delete car")
+        }
+        return cars
+    }
 }
