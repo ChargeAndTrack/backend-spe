@@ -1,5 +1,7 @@
 package infrastructure.user
 
+import domain.user.Car
+import domain.user.User
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -24,3 +26,22 @@ data class AddCarDTO(
     val plate: String,
     val maxBattery: Int
 )
+
+fun User.toDTO(): UserDTO =
+    UserDTO(
+        _id = id,
+        username = username,
+        password = password,
+        role = role.displayName,
+        cars = cars.toDTO()
+    )
+
+fun Collection<Car>.toDTO() = map { it.toDTO() }
+
+fun Car.toDTO(): CarDTO =
+    CarDTO(
+        _id = id,
+        plate = plate,
+        maxBattery = maxBattery,
+        currentBattery = currentBattery
+    )

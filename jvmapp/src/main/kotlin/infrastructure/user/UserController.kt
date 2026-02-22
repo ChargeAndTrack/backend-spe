@@ -4,8 +4,6 @@ import application.user.UserService
 import application.user.UserServiceImpl
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
-import domain.user.Car
-import domain.user.User
 import infrastructure.Config
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.*
@@ -39,21 +37,4 @@ object UserController {
         val user = userService.getUser(userId)
         call.respond(HttpStatusCode.OK, user.toDTO())
     }
-
-    private fun User.toDTO(): UserDTO =
-        UserDTO(
-            _id = id,
-            username = username,
-            password = password,
-            role = role.displayName,
-            cars = cars.map { it.toDTO() }
-        )
-
-    private fun Car.toDTO(): CarDTO =
-        CarDTO(
-            _id = id,
-            plate = plate,
-            maxBattery = maxBattery,
-            currentBattery = currentBattery
-        )
 }
