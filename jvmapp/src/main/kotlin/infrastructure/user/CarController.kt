@@ -35,8 +35,11 @@ object CarController {
         call.respond(HttpStatusCode.Created, car.toDTO())
     }
 
-    suspend fun getCar(call: ApplicationCall) {
-        TODO()
+    suspend fun getCar(call: ApplicationCall) = handleCarRequest(call) { carId ->
+        println("getCar, received carId $carId")
+        val car = carService.getCar(getUserId(call), carId)
+        println("Car: $car")
+        call.respond(HttpStatusCode.OK, car.toDTO())
     }
 
     suspend fun updateCar(call: ApplicationCall) {
@@ -44,7 +47,7 @@ object CarController {
     }
 
     suspend fun deleteCar(call: ApplicationCall) = handleCarRequest(call) { carId ->
-        println("DeleteCar, received carId $carId")
+        println("deleteCar, received carId $carId")
         val cars = carService.deleteCar(getUserId(call), carId)
         println("Cars: $cars")
         call.respond(HttpStatusCode.OK, cars.toDTO())

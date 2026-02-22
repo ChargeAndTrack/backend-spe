@@ -13,6 +13,8 @@ import org.bson.types.ObjectId
 class UserRepositoryImpl : UserRepository {
 
     private val USER_NOT_FOUND_MESSAGE = "User not found"
+    private val CAR_NOT_FOUND_MESSAGE = "Car not found"
+    private val CAR_NOT_DELETED_MESSAGE = "Couldn't delete car"
 
     private val users = MongoDb.database.getCollection<UserDbEntity>("users")
 
@@ -46,9 +48,8 @@ class UserRepositoryImpl : UserRepository {
         return newCar.toDomain()
     }
 
-    override suspend fun getCar(userId: String, carId: String): Car {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getCar(userId: String, carId: String): Car =
+        getCars(userId).find { it.id == carId } ?: throw IllegalArgumentException(CAR_NOT_FOUND_MESSAGE)
 
     override suspend fun updateCar(userId: String, carId: String): Car {
         TODO("Not yet implemented")
@@ -61,7 +62,7 @@ class UserRepositoryImpl : UserRepository {
         )
         val cars = getCars(userId)
         if (cars.any { it.id == carId }) {
-            throw IllegalStateException("Couldn't delete car")
+            throw IllegalStateException(CAR_NOT_DELETED_MESSAGE)
         }
         return cars
     }

@@ -50,6 +50,16 @@ class CarsTest {
     }
 
     @Test
+    fun `it should get the correct car`() = runBlocking {
+        val insertedCar: CarDTO = insertCar(addCar1Body).body()
+        val getResponse = client.get("$BASE_URL/cars/${insertedCar._id}") { header(token)() }
+        assertEquals(HttpStatusCode.OK, getResponse.status)
+        val car: CarDTO = getResponse.body()
+        assertEquals(addCar1Body.plate, car.plate)
+        assertEquals(addCar1Body.maxBattery, car.maxBattery)
+    }
+
+    @Test
     fun `it should delete a car correctly`() = runBlocking {
         val insertedCar: CarDTO = insertCar(addCar1Body).body()
         val deleteResponse = client.delete("$BASE_URL/cars/${insertedCar._id}") { header(token)() }
