@@ -10,10 +10,15 @@ import io.ktor.server.routing.*
 object Router {
     val module: Application.() -> Unit = {
         routing {
+            val chargingStationPath = "/charging-stations"
             route(Config.rootPath ?: "api/v1") {
                 post("/login") { UserController.login(call) }
                 authenticate("auth-jwt") {
                     get("/user") { UserController.getUser(call) }
+                    get(chargingStationPath) { ChargingStationsController.listChargingStations(call) }
+                    get(chargingStationPath.assemblePath("/{id}")) {
+                        ChargingStationsController.getChargingStation(call)
+                    }
                     get("/cars") { CarController.getCars(call) }
                     post("/cars") { CarController.addCar(call) }
                     get("/cars/{id}") { CarController.getCar(call) }
@@ -23,7 +28,13 @@ object Router {
                 }
                 authenticate("auth-admin") {
                     get("/admin") { UserController.getUser(call) }
-                    post("/charging-stations") { ChargingStationsController.addChargingStation(call) }
+                    post(chargingStationPath) { ChargingStationsController.addChargingStation(call) }
+                    delete(chargingStationPath.assemblePath("/{id}")) {
+                        ChargingStationsController.deleteChargingStation(call)
+                    }
+                    put(chargingStationPath.assemblePath("/{id}")) {
+                        ChargingStationsController.updateChargingStation(call)
+                    }
                 }
             }
         }
