@@ -1,5 +1,6 @@
 package infrastructure.charging_station
 
+import domain.charging_station.AddChargingStationInput
 import domain.charging_station.ChargingStation
 import domain.charging_station.ChargingStationImpl
 import domain.charging_station.Location
@@ -16,8 +17,7 @@ data class ChargingStationDbEntity(
     var power: Int,
     var available: Boolean = true,
     var enabled: Boolean = true,
-    var location: LocationDbEntity,
-    var currentCarId: String? = null
+    var location: LocationDbEntity
 )
 
 @Serializable
@@ -27,7 +27,7 @@ data class LocationDbEntity(
 )
 
 fun ChargingStation.toDbEntity(): ChargingStationDbEntity = ChargingStationDbEntity(
-    id = ObjectId(),
+    id = ObjectId(id),
     power = power,
     available = available,
     enabled = enabled,
@@ -50,4 +50,10 @@ fun Location.toDbEntity(): LocationDbEntity = LocationDbEntity(
 fun LocationDbEntity.toDomain(): Location = LocationImpl(
     longitude = longitude,
     latitude = latitude
+)
+
+fun AddChargingStationInput.toDbEntity(): ChargingStationDbEntity = ChargingStationDbEntity(
+    id = ObjectId(),
+    power = power,
+    location = location.toDbEntity()
 )
