@@ -2,6 +2,7 @@ package user
 
 import infrastructure.user.AddCarDTO
 import infrastructure.user.CarDTO
+import infrastructure.user.UpdateCarDTO
 import io.ktor.client.*
 import io.ktor.client.call.body
 import io.ktor.client.request.*
@@ -32,7 +33,7 @@ class CarsTest {
     }
 
     @Test
-    fun `it should get the cars correctly`() = runBlocking {
+    fun `it should get the user cars successfully`() = runBlocking {
         insertCars()
         val response = client.get("$BASE_URL/cars") { header(token)() }
         assertEquals(HttpStatusCode.OK, response.status)
@@ -41,7 +42,7 @@ class CarsTest {
     }
 
     @Test
-    fun `it should add a car correctly`() = runBlocking {
+    fun `it should add a new car successfully`() = runBlocking {
         val response = insertCar(addCar1Body)
         assertEquals(HttpStatusCode.Created, response.status)
         val insertedCar: CarDTO = response.body()
@@ -50,7 +51,7 @@ class CarsTest {
     }
 
     @Test
-    fun `it should get the correct car`() = runBlocking {
+    fun `it should get the requested car`() = runBlocking {
         val insertedCar: CarDTO = insertCar(addCar1Body).body()
         val getResponse = client.get("$BASE_URL/cars/${insertedCar._id}") { header(token)() }
         assertEquals(HttpStatusCode.OK, getResponse.status)
@@ -60,12 +61,30 @@ class CarsTest {
     }
 
     @Test
-    fun `it should delete a car correctly`() = runBlocking {
+    fun `it should update an existing car successfully`() = runBlocking {
+        val insertedCar: CarDTO = insertCar(addCar1Body).body()
+        val updateCarBody = UpdateCarDTO(maxBattery = 50)
+        val putResponse = client.put("$BASE_URL/cars/${insertedCar._id}") {
+            header(token)()
+            setBody(updateCarBody)
+        }
+        assertEquals(HttpStatusCode.OK, putResponse.status)
+        val car: CarDTO = putResponse.body()
+        assertEquals(updateCarBody.maxBattery, car.maxBattery)
+    }
+
+    @Test
+    fun `it should delete an existing car successfully`() = runBlocking {
         val insertedCar: CarDTO = insertCar(addCar1Body).body()
         val deleteResponse = client.delete("$BASE_URL/cars/${insertedCar._id}") { header(token)() }
         assertEquals(HttpStatusCode.OK, deleteResponse.status)
         val cars: Collection<CarDTO> = deleteResponse.body()
         assertTrue(cars.isEmpty())
+    }
+
+    private suspend fun deleteAllUserCars() {
+        val cars: Collection<CarDTO> = client.get("$BASE_URL/cars") { header(token)() }.body()
+        cars.forEach { client.delete("$BASE_URL/cars/${it._id}") { header(token)() } }
     }
 
     private suspend fun insertCar(body: AddCarDTO): HttpResponse {
@@ -79,10 +98,5 @@ class CarsTest {
         insertCar(addCar1Body)
         insertCar(addCar2Body)
         insertCar(addCar3Body)
-    }
-
-    private suspend fun deleteAllUserCars() {
-        val cars: Collection<CarDTO> = client.get("$BASE_URL/cars") { header(token)() }.body()
-        cars.forEach { client.delete("$BASE_URL/cars/${it._id}") { header(token)() } }
     }
 }

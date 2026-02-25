@@ -1,6 +1,5 @@
 package infrastructure.user
 
-import AddCarInput
 import application.user.CarService
 import application.user.CarServiceImpl
 import io.ktor.http.HttpStatusCode
@@ -20,17 +19,15 @@ object CarController {
 
     suspend fun getCars(call: ApplicationCall) {
         println("getCars")
-        val userId = getUserId(call)
-        val cars = carService.getCars(userId)
+        val cars = carService.getCars(getUserId(call))
         println("Cars: $cars")
         call.respond(HttpStatusCode.OK, cars.toDTO())
     }
 
     suspend fun addCar(call: ApplicationCall) {
         println("addCar")
-        val userId = getUserId(call)
         val request = call.receive<AddCarDTO>()
-        val car = carService.addCar(userId, request.toInput())
+        val car = carService.addCar(getUserId(call), request.toInput())
         println("New car: $car")
         call.respond(HttpStatusCode.Created, car.toDTO())
     }
@@ -42,8 +39,12 @@ object CarController {
         call.respond(HttpStatusCode.OK, car.toDTO())
     }
 
-    suspend fun updateCar(call: ApplicationCall) {
-        TODO()
+    suspend fun updateCar(call: ApplicationCall) = handleCarRequest(call) { carId ->
+        println("updateCar, received carId $carId")
+        val request = call.receive<UpdateCarDTO>()
+        val updatedCar = carService.updateCar(getUserId(call), carId, request.toInput())
+        println("UpdatedCar: $updatedCar")
+        call.respond(HttpStatusCode.OK, updatedCar.toDTO())
     }
 
     suspend fun deleteCar(call: ApplicationCall) = handleCarRequest(call) { carId ->
@@ -52,8 +53,6 @@ object CarController {
         println("Cars: $cars")
         call.respond(HttpStatusCode.OK, cars.toDTO())
     }
-
-    private fun AddCarDTO.toInput(): AddCarInput = AddCarInput(plate = plate, maxBattery = maxBattery)
 
     private suspend fun handleCarRequest(call: ApplicationCall, handler: suspend (carId: String) -> Unit) {
         val carId = call.parameters["id"]

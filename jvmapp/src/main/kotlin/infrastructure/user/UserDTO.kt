@@ -1,5 +1,7 @@
 package infrastructure.user
 
+import application.user.AddCarInput
+import application.user.UpdateCarInput
 import domain.user.Car
 import domain.user.User
 import kotlinx.serialization.Serializable
@@ -27,6 +29,13 @@ data class AddCarDTO(
     val maxBattery: Int
 )
 
+@Serializable
+data class UpdateCarDTO(
+    val plate: String? = null,
+    val maxBattery: Int? = null,
+    val currentBattery: Int? = null
+)
+
 fun User.toDTO(): UserDTO =
     UserDTO(
         _id = id,
@@ -38,10 +47,9 @@ fun User.toDTO(): UserDTO =
 
 fun Collection<Car>.toDTO() = map { it.toDTO() }
 
-fun Car.toDTO(): CarDTO =
-    CarDTO(
-        _id = id,
-        plate = plate,
-        maxBattery = maxBattery,
-        currentBattery = currentBattery
-    )
+fun Car.toDTO(): CarDTO = CarDTO(_id = id, plate = plate, maxBattery = maxBattery, currentBattery = currentBattery)
+
+fun AddCarDTO.toInput(): AddCarInput = AddCarInput(plate = plate, maxBattery = maxBattery)
+
+fun UpdateCarDTO.toInput(): UpdateCarInput =
+    UpdateCarInput(plate = plate, maxBattery = maxBattery, currentBattery = currentBattery)
