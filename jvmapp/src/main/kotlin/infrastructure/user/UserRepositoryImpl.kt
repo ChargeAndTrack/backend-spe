@@ -1,7 +1,7 @@
 package infrastructure.user
 
-import application.user.AddCarInput
-import application.user.UpdateCarInput
+import domain.user.AddCarInput
+import domain.user.UpdateCarInput
 import application.user.UserRepository
 import com.mongodb.client.model.Filters.*
 import com.mongodb.client.model.Updates.*
@@ -53,25 +53,15 @@ class UserRepositoryImpl : UserRepository {
     override suspend fun getCar(userId: String, carId: String): Car =
         getCars(userId).find { it.id == carId } ?: throw IllegalArgumentException(CAR_NOT_FOUND_MESSAGE)
 
-    override suspend fun updateCar(userId: String, carId: String, updateCarInput: UpdateCarInput): Car {
-        val currentCar = getCar(userId, carId)
-        val updatedCar: Car =
-            CarImpl(
-                id = currentCar.id,
-                plate = updateCarInput.plate ?: currentCar.plate,
-                maxBattery = updateCarInput.maxBattery ?: currentCar.maxBattery,
-                currentBattery = updateCarInput.currentBattery ?: currentCar.currentBattery
-            )
+    override suspend fun updateCar(userId: String, updatedCar: Car) =
         users
             .findOneAndUpdate(
                 and(
                     eq<ObjectId>("_id", ObjectId(userId)),
-                    eq<ObjectId>("cars._id", ObjectId(carId))
+                    eq<ObjectId>("cars._id", ObjectId(updatedCar.id))
                 ),
                 set("cars.$", updatedCar.toDbEntity())
-            )
-        return updatedCar
-    }
+            ).let {}
 
     override suspend fun deleteCar(userId: String, carId: String): Collection<Car> {
         users.updateOne(

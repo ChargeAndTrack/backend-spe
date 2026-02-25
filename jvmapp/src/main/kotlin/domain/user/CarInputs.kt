@@ -1,4 +1,4 @@
-package application.user
+package domain.user
 
 data class AddCarInput(
     val plate: String,

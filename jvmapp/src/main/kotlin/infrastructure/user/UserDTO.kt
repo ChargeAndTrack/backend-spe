@@ -1,7 +1,7 @@
 package infrastructure.user
 
-import application.user.AddCarInput
-import application.user.UpdateCarInput
+import domain.user.AddCarInput
+import domain.user.UpdateCarInput
 import domain.user.Car
 import domain.user.User
 import kotlinx.serialization.Serializable

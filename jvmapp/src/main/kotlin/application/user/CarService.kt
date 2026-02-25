@@ -1,6 +1,8 @@
 package application.user
 
+import domain.user.AddCarInput
 import domain.user.Car
+import domain.user.UpdateCarInput
 
 interface CarService {
     suspend fun getCars(userId: String): Collection<Car>

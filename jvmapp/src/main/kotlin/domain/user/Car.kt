@@ -2,7 +2,8 @@ package domain.user
 
 interface Car {
     val id: String
-    var plate: String
-    var maxBattery: Int
-    var currentBattery: Int?
+    val plate: String
+    val maxBattery: Int
+    val currentBattery: Int?
+    fun update(updateCarInput: UpdateCarInput): Car
 }
