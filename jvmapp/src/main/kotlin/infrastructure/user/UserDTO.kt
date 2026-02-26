@@ -1,5 +1,6 @@
 package infrastructure.user
 
+import domain.InvalidInputException
 import domain.user.AddCarInput
 import domain.user.UpdateCarInput
 import domain.user.Car
@@ -53,3 +54,20 @@ fun AddCarDTO.toInput(): AddCarInput = AddCarInput(plate = plate, maxBattery = m
 
 fun UpdateCarDTO.toInput(): UpdateCarInput =
     UpdateCarInput(plate = plate, maxBattery = maxBattery, currentBattery = currentBattery)
+
+fun AddCarDTO.validate() = validate(plate = plate, maxBattery = maxBattery)
+
+fun UpdateCarDTO.validate() = validate(plate, maxBattery, currentBattery)
+
+private fun validate(plate: String? = null, maxBattery: Int? = null, currentBattery: Int? = null) =
+    runCatching {
+        plate?.also {
+            require(it.length in 3..10 && it.matches(Regex("^[A-Z0-9 -]+$"))) { "Invalid plate format" }
+        }
+        maxBattery?.also {
+            require(it > 0) { "Invalid max battery, value must be a positive number" }
+        }
+        currentBattery?.also {
+            require(it in 0..100) { "Invalid current battery, value must be between 0 and 100" }
+        }
+    }.onFailure { throw InvalidInputException(it.message ?: "Invalid input") }

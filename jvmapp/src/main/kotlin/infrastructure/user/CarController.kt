@@ -12,11 +12,6 @@ import io.ktor.server.response.respond
 object CarController {
     private val carService: CarService = CarServiceImpl(UserRepositoryImpl())
 
-    private fun getUserId(call: ApplicationCall): String {
-        val principal = call.principal<JWTPrincipal>()
-        return principal!!.payload.getClaim("userId").asString()
-    }
-
     suspend fun getCars(call: ApplicationCall) {
         println("getCars")
         val cars = carService.getCars(getUserId(call))
@@ -26,7 +21,7 @@ object CarController {
 
     suspend fun addCar(call: ApplicationCall) {
         println("addCar")
-        val request = call.receive<AddCarDTO>()
+        val request = call.receive<AddCarDTO>().also { it.validate() }
         val car = carService.addCar(getUserId(call), request.toInput())
         println("New car: $car")
         call.respond(HttpStatusCode.Created, car.toDTO())
@@ -41,7 +36,7 @@ object CarController {
 
     suspend fun updateCar(call: ApplicationCall) = handleCarRequest(call) { carId ->
         println("updateCar, received carId $carId")
-        val request = call.receive<UpdateCarDTO>()
+        val request = call.receive<UpdateCarDTO>().also { it.validate() }
         val updatedCar = carService.updateCar(getUserId(call), carId, request.toInput())
         println("UpdatedCar: $updatedCar")
         call.respond(HttpStatusCode.OK, updatedCar.toDTO())
@@ -52,6 +47,11 @@ object CarController {
         val cars = carService.deleteCar(getUserId(call), carId)
         println("Cars: $cars")
         call.respond(HttpStatusCode.OK, cars.toDTO())
+    }
+
+    private fun getUserId(call: ApplicationCall): String {
+        val principal = call.principal<JWTPrincipal>()
+        return principal!!.payload.getClaim("userId").asString()
     }
 
     private suspend fun handleCarRequest(call: ApplicationCall, handler: suspend (carId: String) -> Unit) {
