@@ -3,10 +3,16 @@ package charging_station
 import infrastructure.Router.assemblePath
 import infrastructure.charging_station.AddChargingStationDTO
 import infrastructure.charging_station.ChargingStationDTO
+import infrastructure.charging_station.ClosestChargingStationDTO
 import infrastructure.charging_station.LocationDTO
 import infrastructure.charging_station.UpdateChargingStationDTO
+import infrastructure.charging_station.NearbyChargingStationsDTO
 import infrastructure.user.LoginRequestDTO
 import infrastructure.user.LoginResponseDTO
+import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.equals.shouldBeEqual
+import io.kotest.matchers.shouldBe
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
@@ -23,27 +29,28 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
-import kotlin.test.*
 
-class ChargingStationTest {
+const val BASE_PATH = "api/v1"
+val BASE_URL = "http://localhost:3000".assemblePath(BASE_PATH)
 
-    private val BASE_PATH = "/api/v1"
-    private val BASE_URL = "http://localhost:3000".assemblePath(BASE_PATH)
-    private val CHARGING_STATION_PATH = "/charging-stations"
+class ChargingStationTest : FunSpec({
 
-    private lateinit var client: HttpClient
-    private lateinit var token: String
-    private lateinit var completeChargingStation: ChargingStationDTO
+    lateinit var client: HttpClient
+    lateinit var token: String
+    lateinit var completeChargingStation1: ChargingStationDTO
+    lateinit var completeChargingStation2: ChargingStationDTO
 
-    private val chargingStation = AddChargingStationDTO(
+    val chargingStation1 = AddChargingStationDTO(
         power = 130,
         location = LocationDTO(longitude = 50.44, latitude = 37.12)
     )
+    val chargingStation2 = AddChargingStationDTO(
+        power = 80,
+        location = LocationDTO(longitude = 50.45, latitude = 37.15)
+    )
 
-    @BeforeTest
-    fun setup() {
+    beforeSpec {
         client = HttpClient(CIO) {
             install(ContentNegotiation) {
                 json(Json {
@@ -53,111 +60,104 @@ class ChargingStationTest {
                 })
             }
         }
-        runBlocking {
-            val loginResponse: LoginResponseDTO = client.post(BASE_URL.assemblePath("/login")) {
-                buildRequest(LoginRequestDTO(username = "admin", password = "admin1234"), addToken = false)
-            }.body()
 
-            token = loginResponse.token
-            assertTrue(token.isNotEmpty())
-        }
-        runBlocking {
-            completeChargingStation = client.post(chargingStationPath()) {
-                buildRequest(chargingStation)
-            }.body<ChargingStationDTO>()
-        }
+        token = client
+            .post(BASE_URL.assemblePath("login")) {
+                buildRequest(LoginRequestDTO(username = "admin", password = "admin1234"), token = null)
+            }.body< LoginResponseDTO>()
+            .token
+        token.isNotEmpty() shouldBe true
+        completeChargingStation1 = client.post(chargingStationPath()) {
+            buildRequest(chargingStation1, token)
+        }.body<ChargingStationDTO>()
+        completeChargingStation2 = client.post(chargingStationPath()) {
+            buildRequest(chargingStation2, token)
+        }.body<ChargingStationDTO>()
     }
 
-    @AfterTest
-    fun teardown() {
+    afterSpec {
         client.close()
     }
 
-    @Test
-    fun `add charging station test`() = runBlocking {
+    test("add charging station test") {
         val response = client.post(chargingStationPath()) {
-            buildRequest(chargingStation)
+            buildRequest(chargingStation1, token)
         }
         val responseBody = response.body<ChargingStationDTO>()
-        completeChargingStation = responseBody
-        assertEquals(HttpStatusCode.Created, response.status)
-        assertEquals(chargingStation.power, responseBody.power)
-        assertEquals(chargingStation.location, responseBody.location)
+        completeChargingStation1 = responseBody
+        response.status shouldBeEqual HttpStatusCode.Created
+        responseBody.power shouldBeEqual chargingStation1.power
+        responseBody.location shouldBeEqual chargingStation1.location
     }
 
-    @Test
-    fun `list all charging stations test`() = runBlocking {
+    test("list all charging stations test") {
         val response = client.get(chargingStationPath()) {
-            buildRequest()
+            buildRequest(token)
         }
-        assertEquals(HttpStatusCode.OK, response.status)
-        assertEquals(
-            completeChargingStation,
-            response.body<Collection<ChargingStationDTO>>().find{ it._id == completeChargingStation._id }
-        )
+        response.status shouldBeEqual HttpStatusCode.OK
+        response
+            .body<Collection<ChargingStationDTO>>()
+            .find { it._id == completeChargingStation1._id } shouldBe completeChargingStation1
     }
 
-    @Test
-    fun `get charging station by id test`() = runBlocking {
-        val response = client.get(chargingStationPath("/${completeChargingStation._id}")) {
-            buildRequest()
+    test("get charging station by id test") {
+        val response = client.get(chargingStationPath(completeChargingStation1._id ?: "")) {
+            buildRequest(token)
         }
-        val wrongIdResponse = client.get(chargingStationPath("/")) {
-            buildRequest()
+        val wrongIdResponse = client.get(chargingStationPath("")) {
+            buildRequest(token)
         }
         val responseBody = response.body<ChargingStationDTO>()
-        assertEquals(HttpStatusCode.OK, response.status)
-        assertEquals(responseBody, completeChargingStation)
-        assertEquals(HttpStatusCode.NotFound, wrongIdResponse.status)
+        response.status shouldBeEqual HttpStatusCode.OK
+        completeChargingStation1 shouldBeEqual responseBody
+        wrongIdResponse.status shouldBeEqual HttpStatusCode.NotFound
     }
 
-    @Test
-    fun `update charging station by id test`() = runBlocking {
+    test("update charging station by id test") {
         val updateChargingStation = UpdateChargingStationDTO(
             power = 150,
             available = false,
             enabled = null,
             location = null
         )
-        val response = client.put(chargingStationPath("/${completeChargingStation._id}")) {
-            buildRequest(updateChargingStation)
+        val response = client.put(chargingStationPath(completeChargingStation1._id ?: "")) {
+            buildRequest(updateChargingStation, token)
         }
         val expectedResult = ChargingStationDTO(
-            _id = completeChargingStation._id,
-            power = updateChargingStation.power ?: completeChargingStation.power,
-            available = updateChargingStation.available ?: completeChargingStation.available,
-            enabled = updateChargingStation.enabled ?: completeChargingStation.enabled,
-            location = updateChargingStation.location ?: completeChargingStation.location
+            _id = completeChargingStation1._id,
+            power = updateChargingStation.power ?: completeChargingStation1.power,
+            available = updateChargingStation.available ?: completeChargingStation1.available,
+            enabled = updateChargingStation.enabled ?: completeChargingStation1.enabled,
+            location = updateChargingStation.location ?: completeChargingStation1.location
         )
-        assertEquals(HttpStatusCode.OK, response.status)
-        assertEquals(expectedResult, response.body<ChargingStationDTO>())
+        response.status shouldBeEqual HttpStatusCode.OK
+        response.body<ChargingStationDTO>() shouldBeEqual expectedResult
     }
 
-    @Test
-    fun `delete charging station by id test`() = runBlocking {
-        val response = client.delete(chargingStationPath("/${completeChargingStation._id}")) {
-            buildRequest()
+    test("delete charging station by id test") {
+        val response = client.delete(chargingStationPath(completeChargingStation1._id ?: "")) {
+            buildRequest(token)
         }
-        val wrongResponse = client.delete(chargingStationPath("/")) {
-            buildRequest()
+        val wrongResponse = client.delete(chargingStationPath("")) {
+            buildRequest(token)
         }
-        assertEquals(HttpStatusCode.OK, response.status)
-        assertEquals(HttpStatusCode.NotFound, wrongResponse.status)
+        response.status shouldBeEqual HttpStatusCode.OK
+        wrongResponse.status shouldBeEqual HttpStatusCode.NotFound
     }
+})
 
-    private fun HttpRequestBuilder.buildRequest(addToken: Boolean = true) {
-        if (addToken) {
-            headers { bearerAuth(token) }
-        }
+private fun HttpRequestBuilder.buildRequest(token: String?) {
+    if (token != null) {
+        headers { bearerAuth(token) }
     }
-
-    private fun <T> HttpRequestBuilder.buildRequest(body: T, addToken: Boolean = true) {
-        if (addToken) headers { bearerAuth(token) }
-        body?.also {
-            contentType(ContentType.Application.Json)
-            setBody(it)
-        }
-    }
-
-    private fun chargingStationPath(vararg paths: String) = BASE_URL.assemblePath(CHARGING_STATION_PATH, *paths)
 }
+
+private fun <T> HttpRequestBuilder.buildRequest(body: T, token: String?) {
+    if (token != null) headers { bearerAuth(token) }
+    body?.also {
+        contentType(ContentType.Application.Json)
+        setBody(it)
+    }
+}
+
+private fun chargingStationPath(vararg paths: String) = BASE_URL.assemblePath("charging-stations", *paths)
