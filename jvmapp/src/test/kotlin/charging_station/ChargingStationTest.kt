@@ -5,8 +5,8 @@ import infrastructure.charging_station.AddChargingStationDTO
 import infrastructure.charging_station.ChargingStationDTO
 import infrastructure.charging_station.ClosestChargingStationDTO
 import infrastructure.charging_station.LocationDTO
-import infrastructure.charging_station.UpdateChargingStationDTO
 import infrastructure.charging_station.NearbyChargingStationsDTO
+import infrastructure.charging_station.UpdateChargingStationDTO
 import infrastructure.user.LoginRequestDTO
 import infrastructure.user.LoginResponseDTO
 import io.kotest.core.spec.style.FunSpec
@@ -77,6 +77,44 @@ class ChargingStationTest : FunSpec({
 
     afterSpec {
         client.close()
+    }
+
+    test("get nearby charging stations test") {
+        val response = client.get(chargingStationPath("near")) {
+            buildRequest(
+                NearbyChargingStationsDTO(
+                    longitude = 50.44,
+                    latitude = 37.12,
+                    radius = 50_000.0,
+                    onlyEnabled = null
+                ),
+                token
+            )
+        }
+        response.status shouldBeEqual HttpStatusCode.OK
+        response.body<Collection<ChargingStationDTO>>() shouldContainExactly listOf(
+            completeChargingStation1,
+            completeChargingStation2
+        )
+    }
+
+    test("get closest charging station test") {
+        client.put(chargingStationPath(completeChargingStation1._id ?: "")) {
+            buildRequest(UpdateChargingStationDTO(
+                power = null,
+                enabled = false,
+                available = null,
+                location = null
+            ), token)
+        }
+        val response = client.get(chargingStationPath("closest")) {
+            buildRequest(
+                ClosestChargingStationDTO(longitude = 50.44, latitude = 37.00, onlyEnabledAndAvailable = true),
+                token
+            )
+        }
+        response.status shouldBeEqual HttpStatusCode.OK
+        response.body<ChargingStationDTO>() shouldBeEqual completeChargingStation2
     }
 
     test("add charging station test") {

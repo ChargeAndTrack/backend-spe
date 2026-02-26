@@ -2,11 +2,15 @@ package infrastructure.charging_station
 
 import domain.charging_station.AddChargingStationInput
 import application.charging_station.ChargingStationRepository
-import com.mongodb.client.model.Filters.eq
+import com.mongodb.client.model.Filters.*
 import com.mongodb.client.model.FindOneAndReplaceOptions
 import com.mongodb.client.model.ReturnDocument
+import com.mongodb.client.model.geojson.Point
+import com.mongodb.client.model.geojson.Position
 import com.mongodb.client.result.InsertOneResult
 import domain.charging_station.ChargingStation
+import domain.charging_station.ClosestChargingStationInput
+import domain.charging_station.NearbyChargingStationsInput
 import infrastructure.MongoDb
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
@@ -65,5 +69,58 @@ class MongoDbChargingStationRepository : ChargingStationRepository {
         ) {
             throw IllegalArgumentException(CHARGING_STATION_NOT_FOUND_MESSAGE)
         }
+    }
+
+    override suspend fun getNearbyChargingStations(
+        nearbyChargingStationsInput: NearbyChargingStationsInput
+    ): Collection<ChargingStation> {
+        return chargingStations
+            .find(
+                and(
+                    listOfNotNull(
+                        nearSphere(
+                            "location",
+                            Point(Position(
+                                nearbyChargingStationsInput.longitude,
+                                nearbyChargingStationsInput.latitude
+                            )),
+                            null,
+                            null
+                        ),
+                        if (nearbyChargingStationsInput.onlyEnabled == true) eq("enabled", true) else null
+                    )
+                )
+            ).map { it.toDomain() }
+            .toList()
+    }
+
+    override suspend fun getClosestChargingStation(
+        closestChargingStationInput: ClosestChargingStationInput
+    ): ChargingStation {
+        return chargingStations
+            .find(
+                and(
+                    listOfNotNull(
+                        nearSphere(
+                            "location",
+                            Point(Position(
+                                closestChargingStationInput.longitude,
+                                closestChargingStationInput.latitude)
+                            ),
+                            null,
+                            null
+                        )
+                    ) + if (closestChargingStationInput.onlyEnabledAndAvailable == true) {
+                        listOf(
+                            eq("enabled", true),
+                            eq("available", true)
+                        )
+                    } else {
+                        emptyList()
+                    }
+                )
+            ).firstOrNull()
+            ?.toDomain()
+            ?: throw IllegalArgumentException(CHARGING_STATION_NOT_FOUND_MESSAGE)
     }
 }

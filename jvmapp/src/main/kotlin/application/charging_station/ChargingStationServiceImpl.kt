@@ -2,6 +2,8 @@ package application.charging_station
 
 import domain.charging_station.AddChargingStationInput
 import domain.charging_station.ChargingStation
+import domain.charging_station.ClosestChargingStationInput
+import domain.charging_station.NearbyChargingStationsInput
 import domain.charging_station.UpdateChargingStationInput
 
 class ChargingStationServiceImpl(val repository: ChargingStationRepository) : ChargingStationService {
@@ -27,4 +29,14 @@ class ChargingStationServiceImpl(val repository: ChargingStationRepository) : Ch
 
     override suspend fun deleteChargingStation(chargingStationId: String) =
         repository.deleteChargingStation(chargingStationId)
+
+    override suspend fun getNearbyChargingStations(
+        nearbyChargingStationsInput: NearbyChargingStationsInput
+    ): Collection<ChargingStation> =
+        repository.getNearbyChargingStations(nearbyChargingStationsInput)
+
+    override suspend fun getClosestChargingStation(
+        closestChargingStationInput: ClosestChargingStationInput
+    ): ChargingStation =
+        repository.getClosestChargingStation(closestChargingStationInput)
 }
