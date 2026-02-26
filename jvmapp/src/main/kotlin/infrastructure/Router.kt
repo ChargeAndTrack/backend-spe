@@ -15,17 +15,23 @@ object Router {
                 authenticate("auth-jwt") {
                     get("/user") { UserController.getUser(call) }
                     get(chargingStationPath) { ChargingStationsController.listChargingStations(call) }
-                    get(chargingStationPath.assemblePath("/{id}")) {
+                    get(chargingStationPath.assemblePath("{id}")) {
                         ChargingStationsController.getChargingStation(call)
+                    }
+                    get(chargingStationPath.assemblePath("near")) {
+                        ChargingStationsController.getNearbyChargingStations(call)
+                    }
+                    get(chargingStationPath.assemblePath("closest")) {
+                        ChargingStationsController.getClosestChargingStation(call)
                     }
                 }
                 authenticate("auth-admin") {
                     get("/admin") { UserController.getUser(call) }
                     post(chargingStationPath) { ChargingStationsController.addChargingStation(call) }
-                    delete(chargingStationPath.assemblePath("/{id}")) {
+                    delete(chargingStationPath.assemblePath("{id}")) {
                         ChargingStationsController.deleteChargingStation(call)
                     }
-                    put(chargingStationPath.assemblePath("/{id}")) {
+                    put(chargingStationPath.assemblePath("{id}")) {
                         ChargingStationsController.updateChargingStation(call)
                     }
                 }
@@ -35,6 +41,6 @@ object Router {
 
     fun String.assemblePath(vararg paths: String): String = buildString {
         append(this@assemblePath)
-        paths.forEach(this::append)
+        paths.forEach { append("/$it") }
     }
 }

@@ -2,6 +2,8 @@ package application.charging_station
 
 import domain.charging_station.AddChargingStationInput
 import domain.charging_station.ChargingStation
+import domain.charging_station.ClosestChargingStationInput
+import domain.charging_station.NearbyChargingStationsInput
 
 interface ChargingStationRepository {
     suspend fun listChargingStations(): Collection<ChargingStation>
@@ -16,4 +18,10 @@ interface ChargingStationRepository {
     ): ChargingStation
 
     suspend fun deleteChargingStation(chargingStationId: String)
+
+    suspend fun getNearbyChargingStations(
+        nearbyChargingStationsInput: NearbyChargingStationsInput
+    ): Collection<ChargingStation>
+
+    suspend fun getClosestChargingStation(closestChargingStationInput: ClosestChargingStationInput): ChargingStation
 }

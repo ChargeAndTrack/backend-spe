@@ -4,8 +4,10 @@ import domain.charging_station.AddChargingStationInput
 import domain.charging_station.UpdateChargingStationInput
 import domain.charging_station.ChargingStation
 import domain.charging_station.ChargingStationImpl
+import domain.charging_station.ClosestChargingStationInput
 import domain.charging_station.Location
 import domain.charging_station.LocationImpl
+import domain.charging_station.NearbyChargingStationsInput
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -35,6 +37,21 @@ data class UpdateChargingStationDTO(
     val available: Boolean?,
     val enabled: Boolean?,
     val location: LocationDTO?
+)
+
+@Serializable
+data class NearbyChargingStationsDTO(
+    val longitude: Double,
+    val latitude: Double,
+    val radius: Double,
+    val onlyEnabled: Boolean?
+)
+
+@Serializable
+data class ClosestChargingStationDTO(
+    val longitude: Double,
+    val latitude: Double,
+    val onlyEnabledAndAvailable: Boolean?
 )
 
 fun ChargingStation.toDTO(): ChargingStationDTO = ChargingStationDTO(
@@ -73,4 +90,17 @@ fun UpdateChargingStationDTO.toInput(): UpdateChargingStationInput = UpdateCharg
     available = available,
     enabled = enabled,
     location = location?.toDomain()
+)
+
+fun NearbyChargingStationsDTO.toInput(): NearbyChargingStationsInput = NearbyChargingStationsInput(
+    longitude = longitude,
+    latitude = latitude,
+    radius = radius,
+    onlyEnabled = onlyEnabled
+)
+
+fun ClosestChargingStationDTO.toInput(): ClosestChargingStationInput = ClosestChargingStationInput(
+    longitude = longitude,
+    latitude = latitude,
+    onlyEnabledAndAvailable = onlyEnabledAndAvailable
 )
