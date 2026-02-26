@@ -64,13 +64,32 @@ class CarsTest {
     fun `it should update an existing car successfully`() = runBlocking {
         val insertedCar: CarDTO = insertCar(addCar1Body).body()
         val updateCarBody = UpdateCarDTO(maxBattery = 50)
-        val putResponse = client.put("$BASE_URL/cars/${insertedCar._id}") {
-            header(token)()
-            setBody(updateCarBody)
-        }
+        val putResponse = updateCar(insertedCar._id, updateCarBody)
         assertEquals(HttpStatusCode.OK, putResponse.status)
         val car: CarDTO = putResponse.body()
         assertEquals(updateCarBody.maxBattery, car.maxBattery)
+    }
+
+    @Test
+    fun `it should fail to update an existing car when invalid values are passed`() = runBlocking {
+        val insertedCar1: CarDTO = insertCar(addCar1Body).body()
+        val insertedCar2: CarDTO = insertCar(addCar2Body).body()
+        assertEquals(
+            HttpStatusCode.InternalServerError,
+            updateCar(insertedCar1._id, UpdateCarDTO(plate = insertedCar2.plate)).status
+        )
+        assertEquals(
+            HttpStatusCode.InternalServerError,
+            updateCar(insertedCar1._id, UpdateCarDTO(plate = "A1")).status
+        )
+        assertEquals(
+            HttpStatusCode.InternalServerError,
+            updateCar(insertedCar1._id, UpdateCarDTO(maxBattery = -5)).status
+        )
+        assertEquals(
+            HttpStatusCode.InternalServerError,
+            updateCar(insertedCar1._id, UpdateCarDTO(currentBattery = 200)).status
+        )
     }
 
     @Test
@@ -98,5 +117,12 @@ class CarsTest {
         insertCar(addCar1Body)
         insertCar(addCar2Body)
         insertCar(addCar3Body)
+    }
+
+    private suspend fun updateCar(carId: String, updateCarBody: UpdateCarDTO): HttpResponse {
+        return client.put("$BASE_URL/cars/${carId}") {
+            header(token)()
+            setBody(updateCarBody)
+        }
     }
 }

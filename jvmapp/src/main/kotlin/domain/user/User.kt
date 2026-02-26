@@ -5,7 +5,8 @@ interface User {
     val username: String
     val password: String
     val role: Role
-    var cars: Collection<Car>
+    val cars: Collection<Car>
+    fun updateCar(carId: String, updateCarInput: UpdateCarInput): Car
 }
 
 enum class Role(val displayName: String) {

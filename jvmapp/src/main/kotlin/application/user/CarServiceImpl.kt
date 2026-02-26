@@ -13,11 +13,10 @@ class CarServiceImpl(private val userRepository: UserRepository) : CarService {
 
     override suspend fun getCar(userId: String, carId: String): Car = userRepository.getCar(userId, carId)
 
-    override suspend fun updateCar(userId: String, carId: String, updateCarInput: UpdateCarInput): Car {
-        val updatedCar: Car = getCar(userId, carId).update(updateCarInput)
-        userRepository.updateCar(userId, updatedCar)
-        return updatedCar
-    }
+    override suspend fun updateCar(userId: String, carId: String, updateCarInput: UpdateCarInput): Car =
+        userRepository.getUser(userId).updateCar(carId, updateCarInput).also {
+            userRepository.updateCar(userId, it)
+        }
 
     override suspend fun deleteCar(userId: String, carId: String): Collection<Car> =
         userRepository.deleteCar(userId, carId)
