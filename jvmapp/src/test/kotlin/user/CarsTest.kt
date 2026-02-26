@@ -43,11 +43,21 @@ class CarsTest {
 
     @Test
     fun `it should add a new car successfully`() = runBlocking {
-        val response = insertCar(addCar1Body)
+        insertCars()
+        val newCarDTO = AddCarDTO("GH123YZ", 100)
+        val response = insertCar(newCarDTO)
         assertEquals(HttpStatusCode.Created, response.status)
         val insertedCar: CarDTO = response.body()
-        assertEquals(addCar1Body.plate, insertedCar.plate)
-        assertEquals(addCar1Body.maxBattery, insertedCar.maxBattery)
+        assertEquals(newCarDTO.plate, insertedCar.plate)
+        assertEquals(newCarDTO.maxBattery, insertedCar.maxBattery)
+    }
+
+    @Test
+    fun `it should fail to add a new car when invalid values are passed`() = runBlocking {
+        insertCars()
+        assertEquals(HttpStatusCode.BadRequest, insertCar(AddCarDTO(addCar1Body.plate, 50)).status)
+        assertEquals(HttpStatusCode.BadRequest, insertCar(AddCarDTO("A1", 50)).status)
+        assertEquals(HttpStatusCode.BadRequest, insertCar(AddCarDTO("GH123YZ", -10)).status)
     }
 
     @Test

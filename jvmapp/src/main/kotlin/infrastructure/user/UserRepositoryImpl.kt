@@ -22,6 +22,8 @@ class UserRepositoryImpl : UserRepository {
 
     private val users = MongoDb.database.getCollection<UserDbEntity>("users")
 
+    override fun getNewId(): String = ObjectId().toString()
+
     override suspend fun findUser(username: String, password: String): User = execute {
         users
             .find(
@@ -45,13 +47,11 @@ class UserRepositoryImpl : UserRepository {
 
     override suspend fun getCars(userId: String): Collection<Car> = getUser(userId).cars
 
-    override suspend fun addCar(userId: String, addCarInput: AddCarInput): Car = execute {
-        val newCar = CarDbEntity(id = ObjectId(), plate = addCarInput.plate, maxBattery = addCarInput.maxBattery)
+    override suspend fun addCar(userId: String, newCar: Car) = execute {
         users
-            .updateOne(eq<ObjectId>("_id", ObjectId(userId)), push("cars", newCar))
-            .takeIf { it.matchedCount > 0 }
-            ?: throw NotFoundException(USER_NOT_FOUND_MESSAGE)
-        newCar.toDomain()
+            .updateOne(eq<ObjectId>("_id", ObjectId(userId)), push("cars", newCar.toDbEntity()))
+            .also { if (it.matchedCount == 0L) { throw NotFoundException(USER_NOT_FOUND_MESSAGE) } }
+            .let {}
     }
 
     override suspend fun getCar(userId: String, carId: String): Car =

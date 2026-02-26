@@ -6,6 +6,8 @@ interface User {
     val password: String
     val role: Role
     val cars: Collection<Car>
+
+    fun addCar(carId: String, addCarInput: AddCarInput): Car
     fun updateCar(carId: String, updateCarInput: UpdateCarInput): Car
 }
 

@@ -9,7 +9,9 @@ class CarServiceImpl(private val userRepository: UserRepository) : CarService {
     override suspend fun getCars(userId: String): Collection<Car> = userRepository.getCars(userId)
 
     override suspend fun addCar(userId: String, addCarInput: AddCarInput): Car =
-        userRepository.addCar(userId, addCarInput)
+        userRepository.getUser(userId).addCar(userRepository.getNewId(), addCarInput).also {
+            userRepository.addCar(userId, it)
+        }
 
     override suspend fun getCar(userId: String, carId: String): Car = userRepository.getCar(userId, carId)
 
