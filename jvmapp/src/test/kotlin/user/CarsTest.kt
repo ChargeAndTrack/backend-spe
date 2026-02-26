@@ -51,13 +51,21 @@ class CarsTest {
     }
 
     @Test
-    fun `it should get the requested car`() = runBlocking {
+    fun `it should get the requested existing car`() = runBlocking {
         val insertedCar: CarDTO = insertCar(addCar1Body).body()
         val getResponse = client.get("$BASE_URL/cars/${insertedCar._id}") { header(token)() }
         assertEquals(HttpStatusCode.OK, getResponse.status)
         val car: CarDTO = getResponse.body()
         assertEquals(addCar1Body.plate, car.plate)
         assertEquals(addCar1Body.maxBattery, car.maxBattery)
+    }
+
+    @Test
+    fun `it should fail to get the requested non-existent car`() = runBlocking {
+        val insertedCar: CarDTO = insertCar(addCar1Body).body()
+        deleteAllUserCars()
+        val getResponse = client.get("$BASE_URL/cars/${insertedCar._id}") { header(token)() }
+        assertEquals(HttpStatusCode.NotFound, getResponse.status)
     }
 
     @Test
@@ -75,19 +83,19 @@ class CarsTest {
         val insertedCar1: CarDTO = insertCar(addCar1Body).body()
         val insertedCar2: CarDTO = insertCar(addCar2Body).body()
         assertEquals(
-            HttpStatusCode.InternalServerError,
+            HttpStatusCode.BadRequest,
             updateCar(insertedCar1._id, UpdateCarDTO(plate = insertedCar2.plate)).status
         )
         assertEquals(
-            HttpStatusCode.InternalServerError,
+            HttpStatusCode.BadRequest,
             updateCar(insertedCar1._id, UpdateCarDTO(plate = "A1")).status
         )
         assertEquals(
-            HttpStatusCode.InternalServerError,
+            HttpStatusCode.BadRequest,
             updateCar(insertedCar1._id, UpdateCarDTO(maxBattery = -5)).status
         )
         assertEquals(
-            HttpStatusCode.InternalServerError,
+            HttpStatusCode.BadRequest,
             updateCar(insertedCar1._id, UpdateCarDTO(currentBattery = 200)).status
         )
     }
