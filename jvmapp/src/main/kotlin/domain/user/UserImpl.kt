@@ -1,5 +1,8 @@
 package domain.user
 
+import domain.InvalidInputException
+import domain.NotFoundException
+
 data class UserImpl(
     override val id: String,
     override val username: String,
@@ -8,9 +11,11 @@ data class UserImpl(
     override val cars: Collection<Car> = emptySet()
 ) : User {
     override fun updateCar(carId: String, updateCarInput: UpdateCarInput): Car {
-        require(isNewPlateNotPresent(carId, updateCarInput.plate)) {
-            "Car with the same plate already exists"
-        }
+        runCatching {
+            require(isNewPlateNotPresent(carId, updateCarInput.plate)) {
+                "Car with the same plate already exists"
+            }
+        }.onFailure { throw InvalidInputException(it.message ?: "Invalid input") }
         return getCar(carId).update(updateCarInput)
     }
 
@@ -18,5 +23,5 @@ data class UserImpl(
         newPlate == null || cars.none { it.id != currentCarId && it.plate == newPlate }
 
     private fun getCar(carId: String): Car =
-        cars.find { it.id == carId } ?: throw IllegalArgumentException("Car not found")
+        cars.find { it.id == carId } ?: throw NotFoundException("Car not found")
 }

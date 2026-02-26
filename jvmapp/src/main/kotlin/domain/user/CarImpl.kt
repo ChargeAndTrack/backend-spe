@@ -1,5 +1,7 @@
 package domain.user
 
+import domain.InvalidInputException
+
 data class CarImpl(
     override val id: String,
     override val plate: String,
@@ -16,8 +18,10 @@ data class CarImpl(
     }
 
     private fun UpdateCarInput.validate() {
-        plate?.also { require(it.length in 3..10 && it.matches(Regex("^[A-Z0-9 -]+$"))) { "Invalid plate format" } }
-        maxBattery?.also { require(it > 0) { "Invalid max battery, value must be a positive number" } }
-        currentBattery?.also { require(it in 0..100) { "Invalid current battery, value must be between 0 and 100" } }
+        runCatching {
+            plate?.also { require(it.length in 3..10 && it.matches(Regex("^[A-Z0-9 -]+$"))) { "Invalid plate format" } }
+            maxBattery?.also { require(it > 0) { "Invalid max battery, value must be a positive number" } }
+            currentBattery?.also { require(it in 0..100) { "Invalid current battery, value must be between 0 and 100" } }
+        }.onFailure { throw InvalidInputException(it.message ?: "Invalid input") }
     }
 }
