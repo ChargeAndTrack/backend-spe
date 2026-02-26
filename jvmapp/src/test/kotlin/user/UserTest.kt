@@ -3,6 +3,8 @@ package user
 import infrastructure.user.LoginRequestDTO
 import infrastructure.user.LoginResponseDTO
 import infrastructure.user.UserDTO
+import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.shouldBe
 import io.ktor.client.*
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
@@ -12,7 +14,6 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
-import kotlin.test.*
 
 const val BASE_URL = "http://localhost:3000/api/v1"
 
@@ -44,34 +45,30 @@ suspend fun loginAndGetToken(client: HttpClient, loginDTO: LoginRequestDTO): Str
     return responseBody.token
 }
 
-class UserTest {
-    private lateinit var client: HttpClient
-    private lateinit var token: String
+class UserTest : FunSpec({
+    lateinit var client: HttpClient
+    lateinit var token: String
 
-    @BeforeTest
-    fun setup() {
+    beforeSpec {
         client = createClient()
         token = runBlocking { loginAndGetToken(client, adminLoginDTO) }
-        assertTrue(token.isNotEmpty())
+        token.isNotEmpty() shouldBe true
     }
 
-    @AfterTest
-    fun teardown() {
+    afterSpec {
         client.close()
     }
 
-    @Test
-    fun `it should get the correct user`() = runBlocking {
+    test("it should get the correct user") {
         val response = client.get("$BASE_URL/user") { header(token)() }
-        assertEquals(HttpStatusCode.OK, response.status)
+        response.status shouldBe HttpStatusCode.OK
         val body: UserDTO = response.body()
-        assertEquals(adminLoginDTO.username, body.username)
-        assertEquals(adminLoginDTO.password, body.password)
+        body.username shouldBe adminLoginDTO.username
+        body.password shouldBe adminLoginDTO.password
     }
 
-    @Test
-    fun `it should fail to get the user without a valid token`() = runBlocking {
+    test("it should fail to get the user without a valid token") {
         val response = client.get("$BASE_URL/user") {}
-        assertEquals(HttpStatusCode.Unauthorized, response.status)
+        response.status shouldBe HttpStatusCode.Unauthorized
     }
-}
+})
