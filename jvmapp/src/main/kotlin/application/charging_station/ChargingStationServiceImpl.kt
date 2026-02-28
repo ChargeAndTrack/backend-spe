@@ -2,6 +2,7 @@ package application.charging_station
 
 import domain.charging_station.AddChargingStationInput
 import domain.charging_station.ChargingStation
+import domain.charging_station.ChargingStationImpl
 import domain.charging_station.ClosestChargingStationInput
 import domain.charging_station.NearbyChargingStationsInput
 import domain.charging_station.UpdateChargingStationInput
@@ -11,7 +12,9 @@ class ChargingStationServiceImpl(val repository: ChargingStationRepository) : Ch
         repository.listChargingStations()
 
     override suspend fun addChargingStation(chargingStationToAdd: AddChargingStationInput): ChargingStation =
-        repository.addChargingStation(chargingStationToAdd)
+        repository.addChargingStation(
+            ChargingStationImpl.create(repository.getNewId(), chargingStationToAdd)
+        )
 
     override suspend fun getChargingStation(chargingStationId: String): ChargingStation =
         repository.getChargingStation(chargingStationId)

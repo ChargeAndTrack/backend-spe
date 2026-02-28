@@ -1,14 +1,15 @@
 package application.charging_station
 
-import domain.charging_station.AddChargingStationInput
 import domain.charging_station.ChargingStation
 import domain.charging_station.ClosestChargingStationInput
 import domain.charging_station.NearbyChargingStationsInput
 
 interface ChargingStationRepository {
+    fun getNewId(): String
+
     suspend fun listChargingStations(): Collection<ChargingStation>
 
-    suspend fun addChargingStation(chargingStationToAdd: AddChargingStationInput): ChargingStation
+    suspend fun addChargingStation(chargingStationToAdd: ChargingStation): ChargingStation
 
     suspend fun getChargingStation(chargingStationId: String): ChargingStation
 

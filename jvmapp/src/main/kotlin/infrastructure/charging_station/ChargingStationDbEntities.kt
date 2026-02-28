@@ -1,6 +1,5 @@
 package infrastructure.charging_station
 
-import domain.charging_station.AddChargingStationInput
 import domain.charging_station.ChargingStation
 import domain.charging_station.ChargingStationImpl
 import domain.charging_station.Location
@@ -50,10 +49,4 @@ fun Location.toDbEntity(): LocationDbEntity = LocationDbEntity(
 fun LocationDbEntity.toDomain(): Location = LocationImpl(
     longitude = longitude,
     latitude = latitude
-)
-
-fun AddChargingStationInput.toDbEntity(): ChargingStationDbEntity = ChargingStationDbEntity(
-    id = ObjectId(),
-    power = power,
-    location = location.toDbEntity()
 )

@@ -1,6 +1,5 @@
 package infrastructure.charging_station
 
-import domain.charging_station.AddChargingStationInput
 import application.charging_station.ChargingStationRepository
 import com.mongodb.client.model.Filters.*
 import com.mongodb.client.model.FindOneAndReplaceOptions
@@ -20,10 +19,14 @@ import java.lang.IllegalArgumentException
 
 class MongoDbChargingStationRepository : ChargingStationRepository {
 
-    private val CHARGING_STATION_NOT_FOUND_MESSAGE = "Charging station not found"
-    private val INVALID_REQUEST_DATA = "Invalid request data"
+    private companion object {
+        const val CHARGING_STATION_NOT_FOUND_MESSAGE = "Charging station not found"
+        const val INVALID_REQUEST_DATA = "Invalid request data"
+    }
 
     private val chargingStations = MongoDb.database.getCollection<ChargingStationDbEntity>("chargingStations")
+
+    override fun getNewId(): String = ObjectId().toString()
 
     override suspend fun listChargingStations(): Collection<ChargingStation> {
         return chargingStations
@@ -32,7 +35,7 @@ class MongoDbChargingStationRepository : ChargingStationRepository {
             .toList()
     }
 
-    override suspend fun addChargingStation(chargingStationToAdd: AddChargingStationInput): ChargingStation {
+    override suspend fun addChargingStation(chargingStationToAdd: ChargingStation): ChargingStation {
         val newChargingStation = chargingStationToAdd.toDbEntity()
         chargingStations
             .insertOne(newChargingStation)
@@ -43,7 +46,7 @@ class MongoDbChargingStationRepository : ChargingStationRepository {
 
     override suspend fun getChargingStation(chargingStationId: String): ChargingStation {
         return (chargingStations
-            .find(eq<ObjectId>("_id", ObjectId(chargingStationId)))
+            .find(eq("_id", ObjectId(chargingStationId)))
             .firstOrNull()
             ?: throw IllegalArgumentException(CHARGING_STATION_NOT_FOUND_MESSAGE)
         ).toDomain()
@@ -55,7 +58,7 @@ class MongoDbChargingStationRepository : ChargingStationRepository {
     ): ChargingStation {
         return chargingStations
             .findOneAndReplace(
-                eq<ObjectId>("_id", ObjectId(chargingStationId)),
+                eq("_id", ObjectId(chargingStationId)),
                 updatedChargingStation.toDbEntity(),
                 FindOneAndReplaceOptions().returnDocument(ReturnDocument.AFTER)
             )?.toDomain()
@@ -64,7 +67,7 @@ class MongoDbChargingStationRepository : ChargingStationRepository {
 
     override suspend fun deleteChargingStation(chargingStationId: String) {
         if (!chargingStations
-                .deleteOne(eq<ObjectId>("_id", ObjectId(chargingStationId)))
+                .deleteOne(eq("_id", ObjectId(chargingStationId)))
                 .wasAcknowledged()
         ) {
             throw IllegalArgumentException(CHARGING_STATION_NOT_FOUND_MESSAGE)
