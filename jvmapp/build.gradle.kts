@@ -44,6 +44,7 @@ tasks.withType<Test>().configureEach {
     testLogging {
         exceptionFormat = TestExceptionFormat.FULL
         events("passed", "skipped", "failed")
+        showStandardStreams = true
     }
 }
 
