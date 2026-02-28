@@ -29,7 +29,7 @@ data class AddChargingStationDTO(
     val power: Int,
     val location: LocationDTO
 ) {
-    init { validate(power, location) }
+    fun validate() = validate(power, location)
 }
 
 @Serializable
@@ -39,7 +39,7 @@ data class UpdateChargingStationDTO(
     val enabled: Boolean?,
     val location: LocationDTO?
 ) {
-    init { validate(power, location) }
+    fun validate() = validate(power, location)
 }
 
 @Serializable
@@ -49,7 +49,7 @@ data class NearbyChargingStationsDTO(
     val radius: Double,
     val onlyEnabled: Boolean?
 ) {
-    init { validate(location = LocationDTO(longitude, latitude), radius = radius) }
+    fun validate() = validate(location = LocationDTO(longitude, latitude), radius = radius)
 }
 
 @Serializable
@@ -58,7 +58,7 @@ data class ClosestChargingStationDTO(
     val latitude: Double,
     val onlyEnabledAndAvailable: Boolean?
 ) {
-    init { validate(location = LocationDTO(longitude, latitude)) }
+    fun validate() = validate(location = LocationDTO(longitude, latitude))
 }
 
 fun ChargingStation.toDTO(): ChargingStationDTO = ChargingStationDTO(
