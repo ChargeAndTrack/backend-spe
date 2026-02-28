@@ -17,8 +17,7 @@ object ChargingStationsController {
         try {
             call.respond(
                 HttpStatusCode.OK,
-                chargingStationService
-                    .listChargingStations()
+                chargingStationService.listChargingStations()
                     .map { it.toDTO() }
                     .toList()
             )
@@ -27,93 +26,67 @@ object ChargingStationsController {
         }
     }
 
-    suspend fun addChargingStation(call: ApplicationCall) {
-        println("Add charging station")
-        try {
-            call.respond(
-                HttpStatusCode.Created,
-                chargingStationService
-                    .addChargingStation(call.receive<AddChargingStationDTO>().toInput())
-                    .toDTO()
-            )
-        } catch (e: IllegalArgumentException) {
-            call.respond(HttpStatusCode.BadRequest, e.message ?: "")
-        } catch (_: Exception) {
-            call.respond(HttpStatusCode.InternalServerError, SERVER_ERROR_MESSAGE)
+    suspend fun addChargingStation(call: ApplicationCall) =
+        call.execute("Add charging station", HttpStatusCode.Created) {
+            chargingStationService.addChargingStation(
+                call.receive<AddChargingStationDTO>()
+                    .also { it.validate() }
+                    .toInput()
+            ).toDTO()
         }
-    }
 
-    suspend fun getChargingStation(call: ApplicationCall) {
-        println("Get charging station by id")
-        try {
-            call.respond(
-                HttpStatusCode.OK,
-                chargingStationService.getChargingStation(call.parameters["id"] ?: "").toDTO()
-            )
-        }  catch (e: IllegalArgumentException) {
-            call.respond(HttpStatusCode.NotFound, e.message ?: "")
-        } catch (_: Exception) {
-            call.respond(HttpStatusCode.InternalServerError, SERVER_ERROR_MESSAGE)
+    suspend fun getChargingStation(call: ApplicationCall) =
+        call.execute("Get charging station by id", HttpStatusCode.OK) {
+            chargingStationService.getChargingStation(call.parameters["id"] ?: "").toDTO()
         }
-    }
 
-    suspend fun deleteChargingStation(call: ApplicationCall) {
-        println("Delete charging station by id")
-        try {
+    suspend fun deleteChargingStation(call: ApplicationCall) =
+        call.execute("Delete charging station by id", HttpStatusCode.OK) {
             chargingStationService.deleteChargingStation(call.parameters["id"] ?: "")
-            call.respond(HttpStatusCode.OK, "charging station removed successfully")
+            "charging station removed successfully"
+        }
+
+    suspend fun updateChargingStation(call: ApplicationCall) =
+        call.execute("Update charging station by id", HttpStatusCode.OK) {
+            chargingStationService.updateChargingStation(
+                call.parameters["id"] ?: "",
+                call.receive<UpdateChargingStationDTO>()
+                    .also { it.validate() }
+                    .toInput()
+            ).toDTO()
+        }
+
+    suspend fun getNearbyChargingStations(call: ApplicationCall) =
+        call.execute("Get nearby charging stations", HttpStatusCode.OK) {
+            chargingStationService.getNearbyChargingStations(
+                call.receive<NearbyChargingStationsDTO>()
+                    .also { it.validate() }
+                    .toInput()
+            ).map { it.toDTO() }
+            .toList()
+        }
+
+    suspend fun getClosestChargingStation(call: ApplicationCall) =
+        call.execute("Get nearby charging stations", HttpStatusCode.OK) {
+            chargingStationService.getClosestChargingStation(
+                call.receive<ClosestChargingStationDTO>()
+                    .also { it.validate() }
+                    .toInput()
+            ).toDTO()
+        }
+
+    private suspend inline fun <reified T : Any> ApplicationCall.execute(
+        message: String,
+        status: HttpStatusCode,
+        response: suspend () -> T
+    ) {
+        println(message)
+        try {
+            respond(status, response())
         } catch (e: IllegalArgumentException) {
-            call.respond(HttpStatusCode.NotFound, e.message ?: "")
+            respond(HttpStatusCode.NotFound, e.message ?: "")
         } catch (_: Exception) {
-            call.respond(HttpStatusCode.InternalServerError, SERVER_ERROR_MESSAGE)
-        }
-    }
-
-    suspend fun updateChargingStation(call: ApplicationCall) {
-        println("Update charging station by id")
-        try {
-            call.respond(
-                HttpStatusCode.OK,
-                chargingStationService.updateChargingStation(
-                    call.parameters["id"] ?: "",
-                    call.receive<UpdateChargingStationDTO>().toInput()
-                ).toDTO()
-            )
-        } catch (e: IllegalArgumentException) {
-            call.respond(HttpStatusCode.NotFound, e.message ?: "")
-        } catch (_: Exception) {
-            call.respond(HttpStatusCode.InternalServerError, SERVER_ERROR_MESSAGE)
-        }
-    }
-
-    suspend fun getNearbyChargingStations(call: ApplicationCall) {
-        println("Get nearby charging stations")
-        try {
-            call.respond(
-                HttpStatusCode.OK,
-                chargingStationService
-                    .getNearbyChargingStations(call.receive<NearbyChargingStationsDTO>().toInput())
-                    .map { it.toDTO() }
-                    .toList()
-            )
-        } catch (_: Exception) {
-            call.respond(HttpStatusCode.InternalServerError, SERVER_ERROR_MESSAGE)
-        }
-    }
-
-    suspend fun getClosestChargingStation(call: ApplicationCall) {
-        println("Get nearby charging stations")
-        try {
-            call.respond(
-                HttpStatusCode.OK,
-                chargingStationService
-                    .getClosestChargingStation(call.receive<ClosestChargingStationDTO>().toInput())
-                    .toDTO()
-            )
-        } catch (e: kotlin.IllegalArgumentException) {
-            call.respond(HttpStatusCode.NotFound, e.message ?: "")
-        } catch (_: Exception) {
-            call.respond(HttpStatusCode.InternalServerError, SERVER_ERROR_MESSAGE)
+            respond(HttpStatusCode.InternalServerError, SERVER_ERROR_MESSAGE)
         }
     }
 }
