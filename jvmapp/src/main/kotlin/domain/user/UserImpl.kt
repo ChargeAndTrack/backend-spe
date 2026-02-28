@@ -15,7 +15,7 @@ data class UserImpl(
 
     override fun addCar(carId: String, addCarInput: AddCarInput): Car {
         requireUniquePlate(carId, addCarInput.plate)
-        return Car.create(carId, addCarInput)
+        return CarImpl.create(carId, addCarInput)
     }
 
     override fun updateCar(carId: String, updateCarInput: UpdateCarInput): Car {

@@ -28,14 +28,23 @@ data class CarDTO(
 data class AddCarDTO(
     val plate: String,
     val maxBattery: Int
-)
+) {
+    fun validate() = validate(plate = plate, maxBattery = maxBattery)
+
+    fun toInput(): AddCarInput = AddCarInput(plate = plate, maxBattery = maxBattery)
+}
 
 @Serializable
 data class UpdateCarDTO(
     val plate: String? = null,
     val maxBattery: Int? = null,
     val currentBattery: Int? = null
-)
+) {
+    fun validate() = validate(plate = plate, maxBattery = maxBattery, currentBattery = currentBattery)
+
+    fun toInput(): UpdateCarInput =
+        UpdateCarInput(plate = plate, maxBattery = maxBattery, currentBattery = currentBattery)
+}
 
 fun User.toDTO(): UserDTO =
     UserDTO(
@@ -50,15 +59,6 @@ fun Collection<Car>.toDTO() = map { it.toDTO() }
 
 fun Car.toDTO(): CarDTO = CarDTO(_id = id, plate = plate, maxBattery = maxBattery, currentBattery = currentBattery)
 
-fun AddCarDTO.toInput(): AddCarInput = AddCarInput(plate = plate, maxBattery = maxBattery)
-
-fun UpdateCarDTO.toInput(): UpdateCarInput =
-    UpdateCarInput(plate = plate, maxBattery = maxBattery, currentBattery = currentBattery)
-
-fun AddCarDTO.validate() = validate(plate = plate, maxBattery = maxBattery)
-
-fun UpdateCarDTO.validate() = validate(plate, maxBattery, currentBattery)
-
 private fun validate(plate: String? = null, maxBattery: Int? = null, currentBattery: Int? = null) =
     runCatching {
         plate?.also {
@@ -70,4 +70,4 @@ private fun validate(plate: String? = null, maxBattery: Int? = null, currentBatt
         currentBattery?.also {
             require(it in 0..100) { "Invalid current battery, value must be between 0 and 100" }
         }
-    }.onFailure { throw InvalidInputException(it.message ?: "Invalid input") }
+    }.onFailure { throw InvalidInputException(it.message ?: "Invalid input") }.let {}
