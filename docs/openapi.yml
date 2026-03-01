@@ -13,6 +13,8 @@ tags:
     description: User account
   - name: car
     description: Car
+  - name: charging-station
+    description: Charging station
 
 paths:
   /login:
@@ -189,6 +191,201 @@ paths:
         '404':
           description: car not found
 
+  /charging-stations:
+    get:
+      tags:
+        - charging-station
+      description: Get all charging stations
+      operationId: listChargingStations
+      responses:
+        '200':
+          description: list of all charging stations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChargingStation'
+    post:
+      tags:
+        - charging-station
+      description: Add a new charging station
+      operationId: addChargingStation
+      requestBody:
+        description: charging station data
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                power:
+                  type: number
+                location:
+                  $ref: '#/components/schemas/Location'
+      responses:
+        '201':
+          description: charging station added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChargingStation'
+        '403':
+          description: user is not admin
+
+  /charging-stations/near:
+    get:
+      tags:
+        - charging-station
+      description: Get charging stations near a location
+      operationId: getNearbyChargingStations
+      parameters:
+        - name: lng
+          in: query
+          required: true
+          schema:
+            type: number
+            format: float
+        - name: lat
+          in: query
+          required: true
+          schema:
+            type: number
+            format: float
+        - name: radius
+          description: radius in meters
+          in: query
+          required: true
+          schema:
+            type: number
+            format: float
+        - name: onlyEnabled
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: list of nearby charging stations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChargingStation'
+
+  /charging-stations/closest:
+    get:
+      tags:
+        - charging-station
+      description: Get the closest charging station to a location
+      operationId: getClosestChargingStation
+      parameters:
+        - name: lng
+          in: query
+          required: true
+          schema:
+            type: number
+            format: float
+        - name: lat
+          in: query
+          required: true
+          schema:
+            type: number
+            format: float
+        - name: onlyEnabledAndAvailable
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: closest charging station
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChargingStation'
+        '404':
+          description: no charging stations found
+
+  /charging-stations/{id}:
+    get:
+      tags:
+        - charging-station
+      description: Get charging station by id
+      operationId: getChargingStation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: charging station retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChargingStation'
+        '404':
+          description: charging station not found
+    put:
+      tags:
+        - charging-station
+      description: Update charging station
+      operationId: updateChargingStation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: charging station data
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                power:
+                  type: number
+                available:
+                  type: boolean
+                enabled:
+                  type: boolean
+                location:
+                  $ref: '#/components/schemas/Location'
+      responses:
+        '200':
+          description: charging station updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChargingStation'
+        '403':
+          description: user is not admin
+        '404':
+          description: charging station not found
+    delete:
+      tags:
+        - charging-station
+      description: Remove charging station
+      operationId: removeChargingStation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: charging station removed successfully
+        '403':
+          description: user is not admin
+        '404':
+          description: charging station not found
+
 components:
   schemas:
     User:
@@ -217,5 +414,25 @@ components:
           type: number
         currentBattery:
           type: number
-        currentChargingStationId:
+    ChargingStation:
+      type: object
+      properties:
+        _id:
           type: string
+        power:
+          type: number
+        available:
+          type: boolean
+        enabled:
+          type: boolean
+        location:
+          $ref: '#/components/schemas/Location'
+    Location:
+      type: object
+      properties:
+        longitude:
+          type: number
+          format: float
+        latitude:
+          type: number
+          format: float
