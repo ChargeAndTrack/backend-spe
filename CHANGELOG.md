@@ -1,3 +1,41 @@
+## [0.4.0](https://github.com/ChargeAndTrack/backend-spe/compare/0.3.0...0.4.0) (2026-03-01)
+
+### Features
+
+* add StatusPages plugin and error handling in Server; update CarsTest accordingly ([9185178](https://github.com/ChargeAndTrack/backend-spe/commit/9185178b9205b2a34de5330abe4abfe8df725c85))
+* **cars:** add AddCarInput validation and create Factory for Car; move some addCar logic from UserRepository to CarService, so add getNewId method to UserRepository interface and addCar method to User interface ([4b2c126](https://github.com/ChargeAndTrack/backend-spe/commit/4b2c12600790a361dc8714b111f159ccd2a4b065))
+* **cars:** add cars routes to Router and add CarController implementing getCars, addCar and deleteCar methods ([635c2a6](https://github.com/ChargeAndTrack/backend-spe/commit/635c2a6c94ff1865e06cbd584f2fc9015cdc056c))
+* **cars:** add CarService interface and implementation ([f6b2c29](https://github.com/ChargeAndTrack/backend-spe/commit/f6b2c2950175d06b45bb1190c68406d214f71b28))
+* **cars:** add DTOs validation ([dc12a28](https://github.com/ChargeAndTrack/backend-spe/commit/dc12a2834d20887a3af76e9a0657b49cccd853c0))
+* **cars:** add UpdateCarInput validation, updateCar method to user interface and plate check in UserImpl; refactor updateCar method in CarServiceImpl ([85bc9c8](https://github.com/ChargeAndTrack/backend-spe/commit/85bc9c81421fb8f2c4d343e0578c8d8fc4e7c090))
+* **cars:** implement getCar functionality ([a55956a](https://github.com/ChargeAndTrack/backend-spe/commit/a55956a173b1f07c128f22f08b8aaed6397c693f))
+* **cars:** implement updateCar functionality and small refactor; rename some car tests ([525aa2e](https://github.com/ChargeAndTrack/backend-spe/commit/525aa2e47858f15689292aa99e593c1c17bbca85))
+* **cars:** update UserRepository interface with car methods and implement getCars, addCar and deleteCar methods in UserRepositoryImpl ([057204f](https://github.com/ChargeAndTrack/backend-spe/commit/057204f55160bde856ad966f50714dbb4a6ffd89))
+
+### Documentation
+
+* **cars:** add cars openapi ([11b884d](https://github.com/ChargeAndTrack/backend-spe/commit/11b884daac00246246cdf8951a5bfe215703fa40))
+
+### Tests
+
+* add user tests ([9dd9dd6](https://github.com/ChargeAndTrack/backend-spe/commit/9dd9dd6d35d67b1843d8aee1ecd840d42adde86e))
+* **cars:** add AddCarDTO and prepare some car tests ([51f094e](https://github.com/ChargeAndTrack/backend-spe/commit/51f094e8dbbd1e8eec8a0d22d49d0d480f3e3375))
+* **cars:** refactor UserTest and CarsTest using kotest instead of kotlin test ([59ffe1c](https://github.com/ChargeAndTrack/backend-spe/commit/59ffe1c48994fa802bbb85cc3d42898ed688fb91))
+
+### Build and continuous integration
+
+* add ktor-server-status-pages dependency ([85e9ba6](https://github.com/ChargeAndTrack/backend-spe/commit/85e9ba68de372ae60f4f9727063ca616bf609109))
+* add test dependencies ([f7bbdb3](https://github.com/ChargeAndTrack/backend-spe/commit/f7bbdb3acc77fdf5a2ca464e9bcffdf07a56c961))
+* replace kotlin test with kotest dependencies ([3f06b31](https://github.com/ChargeAndTrack/backend-spe/commit/3f06b31b307888ed1958170cd3e63b5eb01207b3))
+* show standard streams in tests ([0b6a333](https://github.com/ChargeAndTrack/backend-spe/commit/0b6a3337dd3c61eac9b8ac0c2d45aa30966aa191))
+
+### Refactoring
+
+* **cars:** add specific app exceptions ([c03ff85](https://github.com/ChargeAndTrack/backend-spe/commit/c03ff85a8b0ebbc1eab120061eb0c232e5cb83ff))
+* **cars:** move CarInputs from application to domain, add update method to Car and move car retrieval in CarService ([4c1e26e](https://github.com/ChargeAndTrack/backend-spe/commit/4c1e26e661ecc8cff81018befdd71fadfe4c0ad8))
+* **cars:** move validate method into CarImpl, using it in init, and move Factory into CarImpl; organize better UserDTO by moving methods inside their respective classes ([260d99c](https://github.com/ChargeAndTrack/backend-spe/commit/260d99cce81624edea0ab69e0ac5284274a344bf))
+* move toDTO methods from UserController to UserDTO ([550e73e](https://github.com/ChargeAndTrack/backend-spe/commit/550e73eb178aff6d4e8f7eebff05b32c90d38ef3))
+
 ## [0.3.0](https://github.com/ChargeAndTrack/backend-spe/compare/0.2.0...0.3.0) (2026-02-16)
 
 ### Features
