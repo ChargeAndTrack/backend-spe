@@ -1,3 +1,46 @@
+## [0.5.0](https://github.com/ChargeAndTrack/backend-spe/compare/0.4.0...0.5.0) (2026-03-01)
+
+### Features
+
+* **charging-stations:** add charging station and location serializable DTOs and models for the db ([1a27612](https://github.com/ChargeAndTrack/backend-spe/commit/1a276127077d809729b70cff7b437d0a95ea663f))
+* **charging-stations:** add ChargingStationRepository and ChargingStationService interfaces; add ChargingStationService implementation ([e118fe8](https://github.com/ChargeAndTrack/backend-spe/commit/e118fe84afa42c2104cad3e56a0e946cd175be76))
+* **charging-stations:** add data classes representing inputs for charging stations, add update charging station method ([173448b](https://github.com/ChargeAndTrack/backend-spe/commit/173448b2f18bcec73db99be7ca24cba6d8a44766))
+* **charging-stations:** add get, put and delete charging stations routes to the Router; implement their handlers in the controller, service and repository ([c2ba5d3](https://github.com/ChargeAndTrack/backend-spe/commit/c2ba5d3471505e35229e6d5007730e85da14663d))
+* **charging-stations:** add getNearbyChargingStations and getClosestChargingStation routes and implementations; add their input and DTO data classes ([e461dae](https://github.com/ChargeAndTrack/backend-spe/commit/e461dae1176da57210612f2c6382314935528115))
+* **charging-stations:** add LocationImpl, ChargingStationImpl and DTOs validation; add companion object Factory for ChargingStationImpl; add getNewId function to ChargingStationRepository ([b8466c0](https://github.com/ChargeAndTrack/backend-spe/commit/b8466c0d81f2108e94882749bb99fb33a7b0b871))
+* **charging-stations:** add MongoDbChargingStationRepository and ChargingStationsController with listChargingStations and addChargingStation routes and handlers; add AddChargingStationDTO ([d32c797](https://github.com/ChargeAndTrack/backend-spe/commit/d32c7972e2b2babbfbb6bf1a1dbafaab1beae1cf))
+* **charging-stations:** add UpdateChargingStationDTO  and its conversion to input, rmove currentCarId from ChargingStationDTO and ChargingStationDbEntity, add AddChargingStationInput conversion to db entity ([ee3b0f3](https://github.com/ChargeAndTrack/backend-spe/commit/ee3b0f39c786f6b468ab68e2536c0eee1b2fd95a))
+* **charging-stations:** change addChargingStation methods return type to nullable ChargingStation, add extension function 'assemblePath' to Router ([90beec6](https://github.com/ChargeAndTrack/backend-spe/commit/90beec6b45c1ecd6995a91a0a43ba60fe4dae27b))
+* **charging-stations:** getNearbyChargingStation and getClosestChargingStation request data as query parameters; minor refactors ([fe37b50](https://github.com/ChargeAndTrack/backend-spe/commit/fe37b50903504b1f3de719d1fc0cfdd1a4119eb9))
+* **charging-stations:** move domain interfaces to charging_station directory and add their implementation ([b9aa7fd](https://github.com/ChargeAndTrack/backend-spe/commit/b9aa7fd0f641d1b311e5657655050158c5b8cdbd))
+
+### Bug Fixes
+
+* **build:** add ktor server-status-pages dependency ([3742a6e](https://github.com/ChargeAndTrack/backend-spe/commit/3742a6eb13aa1f4cbaca13cfe19f23881ec55323))
+
+### Documentation
+
+* **charging-stations:** add charging stations openapi ([0f754b0](https://github.com/ChargeAndTrack/backend-spe/commit/0f754b0e482a3c27b415564001bbf6f0a73a3847))
+* **charging-stations:** change unauthorized status code to 401 ([7ee9de3](https://github.com/ChargeAndTrack/backend-spe/commit/7ee9de3c679ba2c888a22498e0db8b19a91c512c))
+
+### Tests
+
+* **charging-stations:** add ChargingStationTest class and implement test for adding a charging station ([76c745e](https://github.com/ChargeAndTrack/backend-spe/commit/76c745e2c108c7c1d5fb810d6db8a35eebb26939))
+* **charging-stations:** add tests for getting, deleting and updating a charging station by id and listing all the charging stations ([b0a4f5f](https://github.com/ChargeAndTrack/backend-spe/commit/b0a4f5f989b0ab815f6a1b29ef29bd0b3600b11a))
+* **charging-stations:** replace kotlin test with kotest implementation ([0be45c7](https://github.com/ChargeAndTrack/backend-spe/commit/0be45c7ed8e85e5a95c59af4c7996cb2148d1e6c))
+
+### Build and continuous integration
+
+* add test dependencies and configure test task ([d521c4d](https://github.com/ChargeAndTrack/backend-spe/commit/d521c4dca8d510e41375f195ca2a62162b91d621))
+* replace kotlin test with kotest dependencies and configure gradle libs.versions.toml file with versions, libraries, bundles and plugins ([12390ba](https://github.com/ChargeAndTrack/backend-spe/commit/12390ba5fe74c3b7aba5e8a3ed9ec7316507e217))
+
+### Refactoring
+
+* **charging-stations:** move ChargingStationDTOs validation in a dedicated method and ChargingStationController common responding logic in an extension function ([3ea9cd5](https://github.com/ChargeAndTrack/backend-spe/commit/3ea9cd5d93cc390a5961d74f14b51cab71424826))
+* **charging-stations:** move extension functions for conversions where serializable data classes are defined ([188da1c](https://github.com/ChargeAndTrack/backend-spe/commit/188da1c5d8556b93b46e6d25d7fb6d622e61d094))
+* **charging-stations:** use AppExceptions ([e973546](https://github.com/ChargeAndTrack/backend-spe/commit/e973546576b0f7f0f5541c11368aef1fe9b8b145))
+* **test:** create common buildRequest extension function and charging station path assemble function ([f75566b](https://github.com/ChargeAndTrack/backend-spe/commit/f75566b93900d0671dd80af3665f9210bc7f2517))
+
 ## [0.4.0](https://github.com/ChargeAndTrack/backend-spe/compare/0.3.0...0.4.0) (2026-03-01)
 
 ### Features
