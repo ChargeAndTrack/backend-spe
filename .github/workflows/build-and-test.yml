@@ -6,8 +6,8 @@ on:
   pull_request:
 
 jobs:
-  build:
-    name: Build
+  build-and-test:
+    name: Build and test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -16,12 +16,14 @@ jobs:
         run: chmod +x ./gradlew
       - name: Set up Docker
         uses: docker/setup-docker-action@v4
-      - name: Docker compose
-        run: docker compose build
+      - name: Docker compose up
+        run: docker compose up --build -d --wait
+      - name: Gradle test
+        run: ./gradlew clean test
 
   success:
     needs:
-      - build
+      - build-and-test
     if: always()
     runs-on: ubuntu-latest
     steps:

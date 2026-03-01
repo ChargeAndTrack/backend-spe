@@ -3,13 +3,16 @@ package infrastructure
 import infrastructure.user.CarController
 import infrastructure.charging_station.ChargingStationsController
 import infrastructure.user.UserController
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.*
 import io.ktor.server.auth.authenticate
+import io.ktor.server.response.respond
 import io.ktor.server.routing.*
 
 object Router {
     val module: Application.() -> Unit = {
         routing {
+            get("/health") { call.respond(HttpStatusCode.OK) }
             val chargingStationPath = "/charging-stations"
             val carsPath = "/cars"
             route(Config.rootPath ?: "api/v1") {

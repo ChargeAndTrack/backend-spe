@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   build:
-    uses: ./.github/workflows/build.yml
+    uses: ./.github/workflows/build-and-test.yml
     secrets: inherit
 
   release:
