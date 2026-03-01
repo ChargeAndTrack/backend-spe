@@ -1,5 +1,10 @@
 package user
 
+import Setup.BASE_URL
+import Setup.buildRequest
+import Setup.createClient
+import Setup.loginAndGetToken
+import Setup.userLoginDTO
 import infrastructure.user.AddCarDTO
 import infrastructure.user.CarDTO
 import infrastructure.user.UpdateCarDTO
@@ -35,7 +40,7 @@ class CarsTest : FunSpec() {
 
         test("it should get the user cars successfully") {
             insertCars()
-            val response = client.get(CARS_URL) { header(token)() }
+            val response = client.get(CARS_URL) { buildRequest<Unit>(token) }
             response.status shouldBe HttpStatusCode.OK
             val cars: Collection<CarDTO> = response.body()
             cars.size shouldBe 3
@@ -69,7 +74,7 @@ class CarsTest : FunSpec() {
         context("get car tests") {
             test("it should get the requested existing car") {
                 val insertedCar: CarDTO = insertCar(addCar1Body).body()
-                val getResponse = client.get(carUrl(insertedCar._id)) { header(token)() }
+                val getResponse = client.get(carUrl(insertedCar._id)) { buildRequest<Unit>(token) }
                 getResponse.status shouldBe HttpStatusCode.OK
                 val car: CarDTO = getResponse.body()
                 car.plate shouldBe addCar1Body.plate
@@ -79,7 +84,7 @@ class CarsTest : FunSpec() {
             test("it should fail to get the requested non-existent car") {
                 val insertedCar: CarDTO = insertCar(addCar1Body).body()
                 deleteAllUserCars()
-                val getResponse = client.get(carUrl(insertedCar._id)) { header(token)() }
+                val getResponse = client.get(carUrl(insertedCar._id)) { buildRequest<Unit>(token) }
                 getResponse.status shouldBe HttpStatusCode.NotFound
             }
         }
@@ -122,7 +127,7 @@ class CarsTest : FunSpec() {
 
         test("it should delete an existing car successfully") {
             val insertedCar: CarDTO = insertCar(addCar1Body).body()
-            val deleteResponse = client.delete(carUrl(insertedCar._id)) { header(token)() }
+            val deleteResponse = client.delete(carUrl(insertedCar._id)) { buildRequest<Unit>(token) }
             deleteResponse.status shouldBe HttpStatusCode.OK
             val cars: Collection<CarDTO> = deleteResponse.body()
             cars.isEmpty() shouldBe true
@@ -130,15 +135,12 @@ class CarsTest : FunSpec() {
     }
 
     private suspend fun deleteAllUserCars() {
-        val cars: Collection<CarDTO> = client.get(CARS_URL) { header(token)() }.body()
-        cars.forEach { client.delete(carUrl(it._id)) { header(token)() } }
+        val cars: Collection<CarDTO> = client.get(CARS_URL) { buildRequest<Unit>(token) }.body()
+        cars.forEach { client.delete(carUrl(it._id)) { buildRequest<Unit>(token) } }
     }
 
-    private suspend fun insertCar(body: AddCarDTO): HttpResponse =
-        client.post(CARS_URL) {
-            header(token)()
-            setBody(body)
-        }
+    private suspend fun insertCar(addCarBody: AddCarDTO): HttpResponse =
+        client.post(CARS_URL) { buildRequest(token, body = addCarBody) }
 
     private suspend fun insertCars() {
         insertCar(addCar1Body)
@@ -147,8 +149,5 @@ class CarsTest : FunSpec() {
     }
 
     private suspend fun updateCar(carId: String, updateCarBody: UpdateCarDTO): HttpResponse =
-        client.put(carUrl(carId)) {
-            header(token)()
-            setBody(updateCarBody)
-        }
+        client.put(carUrl(carId)) { buildRequest(token, body = updateCarBody) }
 }

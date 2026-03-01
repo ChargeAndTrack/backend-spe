@@ -1,39 +1,26 @@
 package charging_station
 
+import Setup.BASE_URL
+import Setup.adminLoginDTO
+import Setup.buildRequest
+import Setup.createClient
+import Setup.loginAndGetToken
 import infrastructure.Router.assemblePath
 import infrastructure.charging_station.AddChargingStationDTO
 import infrastructure.charging_station.ChargingStationDTO
-import infrastructure.charging_station.ClosestChargingStationDTO
 import infrastructure.charging_station.LocationDTO
-import infrastructure.charging_station.NearbyChargingStationsDTO
 import infrastructure.charging_station.UpdateChargingStationDTO
-import infrastructure.user.LoginRequestDTO
-import infrastructure.user.LoginResponseDTO
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldBe
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.engine.cio.CIO
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.HttpRequestBuilder
-import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
-import io.ktor.client.request.headers
-import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.put
-import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.contentType
-import io.ktor.serialization.kotlinx.json.json
-import kotlinx.serialization.json.Json
-
-const val BASE_PATH = "api/v1"
-val BASE_URL = "http://localhost:3000".assemblePath(BASE_PATH)
 
 class ChargingStationTest : FunSpec({
 
@@ -52,21 +39,8 @@ class ChargingStationTest : FunSpec({
     )
 
     beforeSpec {
-        client = HttpClient(CIO) {
-            install(ContentNegotiation) {
-                json(Json {
-                    prettyPrint = true
-                    isLenient = true
-                    ignoreUnknownKeys = true
-                })
-            }
-        }
-
-        token = client
-            .post(BASE_URL.assemblePath("login")) {
-                buildRequest(token = null, body = LoginRequestDTO(username = "admin", password = "admin1234"))
-            }.body< LoginResponseDTO>()
-            .token
+        client = createClient()
+        token = loginAndGetToken(client, adminLoginDTO)
         token.isNotEmpty() shouldBe true
         completeChargingStation1 = client.post(chargingStationPath()) {
             buildRequest(token, chargingStation1)
@@ -184,18 +158,5 @@ class ChargingStationTest : FunSpec({
         wrongResponse.status shouldBeEqual HttpStatusCode.NotFound
     }
 })
-
-private fun <T> HttpRequestBuilder.buildRequest(
-    token: String?,
-    body: T? = null,
-    parametersMap: Map<String, String>? = null
-) {
-    if (token != null) headers { bearerAuth(token) }
-    parametersMap?.map { (key, value) -> parameter(key, value) }
-    body?.also {
-        contentType(ContentType.Application.Json)
-        setBody(it)
-    }
-}
 
 private fun chargingStationPath(vararg paths: String) = BASE_URL.assemblePath("charging-stations", *paths)
