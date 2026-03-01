@@ -230,7 +230,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ChargingStation'
-        '403':
+        '401':
           description: user is not admin
 
   /charging-stations/near:
@@ -363,7 +363,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ChargingStation'
-        '403':
+        '401':
           description: user is not admin
         '404':
           description: charging station not found
@@ -381,7 +381,7 @@ paths:
       responses:
         '200':
           description: charging station removed successfully
-        '403':
+        '401':
           description: user is not admin
         '404':
           description: charging station not found
