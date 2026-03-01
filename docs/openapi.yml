@@ -64,6 +64,131 @@ paths:
         '404':
           description: user not found
 
+  /cars:
+    get:
+      tags:
+        - car
+      description: Get all cars of the user
+      operationId: getUserCars
+      responses:
+        '200':
+          description: list of cars of the user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Car'
+        '404':
+          description: user not found
+    post:
+      tags:
+        - car
+      description: Add a new car to the user
+      operationId: addUserCar
+      requestBody:
+        description: car data
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                plate:
+                  type: string
+                maxBattery:
+                  type: number
+      responses:
+        '201':
+          description: car added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Car'
+        '404':
+          description: user not found
+
+  /cars/{id}:
+    get:
+      tags:
+        - car
+      description: Get car by id
+      operationId: readCar
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: car retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Car'
+        '404':
+          description: car not found
+    put:
+      tags:
+        - car
+      description: Update car
+      operationId: updateCar
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: car data
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                plate:
+                  type: string
+                maxBattery:
+                  type: number
+                currentBattery:
+                  type: number
+      responses:
+        '200':
+          description: car updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Car'
+        '404':
+          description: car not found
+    delete:
+      tags:
+        - car
+      description: Delete car
+      operationId: deleteCar
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: car deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cars:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Car'
+        '404':
+          description: car not found
+
 components:
   schemas:
     User:
