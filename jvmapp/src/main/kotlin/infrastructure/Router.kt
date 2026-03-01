@@ -11,6 +11,7 @@ object Router {
     val module: Application.() -> Unit = {
         routing {
             val chargingStationPath = "/charging-stations"
+            val carsPath = "/cars"
             route(Config.rootPath ?: "api/v1") {
                 post("/login") { UserController.login(call) }
                 authenticate("auth-jwt") {
@@ -25,14 +26,13 @@ object Router {
                     get(chargingStationPath.assemblePath("closest")) {
                         ChargingStationsController.getClosestChargingStation(call)
                     }
-                    get("/cars") { CarController.getCars(call) }
-                    post("/cars") { CarController.addCar(call) }
-                    get("/cars/{id}") { CarController.getCar(call) }
-                    put("/cars/{id}") { CarController.updateCar(call) }
-                    delete("/cars/{id}") { CarController.deleteCar(call) }
+                    get(carsPath) { CarController.getCars(call) }
+                    post(carsPath) { CarController.addCar(call) }
+                    get(carsPath.assemblePath("{id}")) { CarController.getCar(call) }
+                    put(carsPath.assemblePath("{id}")) { CarController.updateCar(call) }
+                    delete(carsPath.assemblePath("{id}")) { CarController.deleteCar(call) }
                 }
                 authenticate("auth-admin") {
-                    get("/admin") { UserController.getUser(call) }
                     post(chargingStationPath) { ChargingStationsController.addChargingStation(call) }
                     delete(chargingStationPath.assemblePath("{id}")) {
                         ChargingStationsController.deleteChargingStation(call)

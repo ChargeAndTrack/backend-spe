@@ -9,6 +9,11 @@ import domain.charging_station.LocationImpl
 import domain.charging_station.NearbyChargingStationsInput
 import kotlinx.serialization.Serializable
 
+interface QueryDTO<T> {
+    fun validate()
+    fun toInput(): T
+}
+
 @Serializable
 data class ChargingStationDTO(
     val _id: String?,
@@ -22,14 +27,18 @@ data class ChargingStationDTO(
 data class LocationDTO(
     val longitude: Double,
     val latitude: Double
-)
+) {
+    fun toDomain(): Location = LocationImpl(longitude, latitude)
+}
 
 @Serializable
 data class AddChargingStationDTO(
     val power: Int,
     val location: LocationDTO
-) {
-    fun validate() = validate(power, location)
+) : QueryDTO<AddChargingStationInput> {
+    override fun validate() = validate(power, location)
+
+    override fun toInput(): AddChargingStationInput = AddChargingStationInput(power, location.toDomain())
 }
 
 @Serializable
@@ -38,8 +47,15 @@ data class UpdateChargingStationDTO(
     val available: Boolean?,
     val enabled: Boolean?,
     val location: LocationDTO?
-) {
-    fun validate() = validate(power, location)
+) : QueryDTO<UpdateChargingStationInput> {
+    override fun validate() = validate(power, location)
+
+    override fun toInput(): UpdateChargingStationInput = UpdateChargingStationInput(
+        power = power,
+        available = available,
+        enabled = enabled,
+        location = location?.toDomain()
+    )
 }
 
 @Serializable
@@ -48,8 +64,10 @@ data class NearbyChargingStationsDTO(
     val latitude: Double,
     val radius: Double,
     val onlyEnabled: Boolean?
-) {
-    fun validate() = validate(location = LocationDTO(longitude, latitude), radius = radius)
+) : QueryDTO<NearbyChargingStationsInput> {
+    override fun validate() = validate(location = LocationDTO(longitude, latitude), radius = radius)
+
+    override fun toInput(): NearbyChargingStationsInput = NearbyChargingStationsInput(longitude, latitude, radius, onlyEnabled)
 }
 
 @Serializable
@@ -57,8 +75,14 @@ data class ClosestChargingStationDTO(
     val longitude: Double,
     val latitude: Double,
     val onlyEnabledAndAvailable: Boolean?
-) {
-    fun validate() = validate(location = LocationDTO(longitude, latitude))
+) : QueryDTO<ClosestChargingStationInput> {
+    override fun validate() = validate(location = LocationDTO(longitude, latitude))
+
+    override fun toInput(): ClosestChargingStationInput = ClosestChargingStationInput(
+        longitude,
+        latitude,
+        onlyEnabledAndAvailable
+    )
 }
 
 fun ChargingStation.toDTO(): ChargingStationDTO = ChargingStationDTO(
@@ -70,33 +94,6 @@ fun ChargingStation.toDTO(): ChargingStationDTO = ChargingStationDTO(
 )
 
 fun Location.toDTO(): LocationDTO = LocationDTO(longitude, latitude)
-
-fun LocationDTO.toDomain(): Location = LocationImpl(longitude, latitude)
-
-fun AddChargingStationDTO.toInput(): AddChargingStationInput = AddChargingStationInput(
-    power = power,
-    location = location.toDomain()
-)
-
-fun UpdateChargingStationDTO.toInput(): UpdateChargingStationInput = UpdateChargingStationInput(
-    power = power,
-    available = available,
-    enabled = enabled,
-    location = location?.toDomain()
-)
-
-fun NearbyChargingStationsDTO.toInput(): NearbyChargingStationsInput = NearbyChargingStationsInput(
-    longitude = longitude,
-    latitude = latitude,
-    radius = radius,
-    onlyEnabled = onlyEnabled
-)
-
-fun ClosestChargingStationDTO.toInput(): ClosestChargingStationInput = ClosestChargingStationInput(
-    longitude = longitude,
-    latitude = latitude,
-    onlyEnabledAndAvailable = onlyEnabledAndAvailable
-)
 
 private fun validate(power: Int? = null, location: LocationDTO? = null, radius: Double? = null) {
     power?.also { require(it > 0) { "Power must be greater than zero."} }

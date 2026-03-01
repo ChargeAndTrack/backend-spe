@@ -2,6 +2,7 @@ package infrastructure.charging_station
 
 import application.charging_station.ChargingStationServiceImpl
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.Parameters
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -59,7 +60,7 @@ object ChargingStationsController {
     suspend fun getNearbyChargingStations(call: ApplicationCall) =
         call.execute("Get nearby charging stations", HttpStatusCode.OK) {
             chargingStationService.getNearbyChargingStations(
-                call.receive<NearbyChargingStationsDTO>()
+                call.request.queryParameters.toNearbyChargingStationDTO()
                     .also { it.validate() }
                     .toInput()
             ).map { it.toDTO() }
@@ -69,11 +70,24 @@ object ChargingStationsController {
     suspend fun getClosestChargingStation(call: ApplicationCall) =
         call.execute("Get nearby charging stations", HttpStatusCode.OK) {
             chargingStationService.getClosestChargingStation(
-                call.receive<ClosestChargingStationDTO>()
+                 call.request.queryParameters.toClosestChargingStationDTO()
                     .also { it.validate() }
                     .toInput()
             ).toDTO()
         }
+
+    private fun Parameters.toNearbyChargingStationDTO() = NearbyChargingStationsDTO(
+        this["lng"]!!.toDouble(),
+        this["lat"]!!.toDouble(),
+        this["radius"]!!.toDouble(),
+        this["onlyEnabled"].toBoolean()
+    )
+
+    private fun Parameters.toClosestChargingStationDTO() = ClosestChargingStationDTO(
+        this["lng"]!!.toDouble(),
+        this["lat"]!!.toDouble(),
+        this["onlyEnabledAndAvailable"].toBoolean()
+    )
 
     private suspend inline fun <reified T : Any> ApplicationCall.execute(
         message: String,

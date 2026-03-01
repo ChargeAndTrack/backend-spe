@@ -22,6 +22,7 @@ import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
+import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
@@ -63,15 +64,15 @@ class ChargingStationTest : FunSpec({
 
         token = client
             .post(BASE_URL.assemblePath("login")) {
-                buildRequest(LoginRequestDTO(username = "admin", password = "admin1234"), token = null)
+                buildRequest(token = null, body = LoginRequestDTO(username = "admin", password = "admin1234"))
             }.body< LoginResponseDTO>()
             .token
         token.isNotEmpty() shouldBe true
         completeChargingStation1 = client.post(chargingStationPath()) {
-            buildRequest(chargingStation1, token)
+            buildRequest(token, chargingStation1)
         }.body<ChargingStationDTO>()
         completeChargingStation2 = client.post(chargingStationPath()) {
-            buildRequest(chargingStation2, token)
+            buildRequest(token, chargingStation2)
         }.body<ChargingStationDTO>()
     }
 
@@ -81,15 +82,11 @@ class ChargingStationTest : FunSpec({
 
     test("get nearby charging stations test") {
         val response = client.get(chargingStationPath("near")) {
-            buildRequest(
-                NearbyChargingStationsDTO(
-                    longitude = 50.44,
-                    latitude = 37.12,
-                    radius = 50_000.0,
-                    onlyEnabled = null
-                ),
-                token
-            )
+            buildRequest<Unit>(token, parametersMap = mapOf(
+                "lng" to 50.44.toString(),
+                "lat" to 37.12.toString(),
+                "radius" to 50_000.0.toString()
+            ))
         }
         response.status shouldBeEqual HttpStatusCode.OK
         response.body<Collection<ChargingStationDTO>>() shouldContainExactly listOf(
@@ -100,18 +97,22 @@ class ChargingStationTest : FunSpec({
 
     test("get closest charging station test") {
         client.put(chargingStationPath(completeChargingStation1._id ?: "")) {
-            buildRequest(UpdateChargingStationDTO(
-                power = null,
-                enabled = false,
-                available = null,
-                location = null
-            ), token)
+            buildRequest(
+                token,
+                UpdateChargingStationDTO(
+                    power = null,
+                    enabled = false,
+                    available = null,
+                    location = null
+                )
+            )
         }
         val response = client.get(chargingStationPath("closest")) {
-            buildRequest(
-                ClosestChargingStationDTO(longitude = 50.44, latitude = 37.00, onlyEnabledAndAvailable = true),
-                token
-            )
+            buildRequest<Unit>(token, parametersMap = mapOf(
+                "lng" to 50.44.toString(),
+                "lat" to 37.00.toString(),
+                "onlyEnabledAndAvailable" to true.toString()
+            ))
         }
         response.status shouldBeEqual HttpStatusCode.OK
         response.body<ChargingStationDTO>() shouldBeEqual completeChargingStation2
@@ -119,7 +120,7 @@ class ChargingStationTest : FunSpec({
 
     test("add charging station test") {
         val response = client.post(chargingStationPath()) {
-            buildRequest(chargingStation1, token)
+            buildRequest(token, chargingStation1)
         }
         val responseBody = response.body<ChargingStationDTO>()
         completeChargingStation1 = responseBody
@@ -130,7 +131,7 @@ class ChargingStationTest : FunSpec({
 
     test("list all charging stations test") {
         val response = client.get(chargingStationPath()) {
-            buildRequest(token)
+            buildRequest<Unit>(token)
         }
         response.status shouldBeEqual HttpStatusCode.OK
         response
@@ -140,10 +141,10 @@ class ChargingStationTest : FunSpec({
 
     test("get charging station by id test") {
         val response = client.get(chargingStationPath(completeChargingStation1._id ?: "")) {
-            buildRequest(token)
+            buildRequest<Unit>(token)
         }
         val wrongIdResponse = client.get(chargingStationPath("")) {
-            buildRequest(token)
+            buildRequest<Unit>(token)
         }
         val responseBody = response.body<ChargingStationDTO>()
         response.status shouldBeEqual HttpStatusCode.OK
@@ -159,7 +160,7 @@ class ChargingStationTest : FunSpec({
             location = null
         )
         val response = client.put(chargingStationPath(completeChargingStation1._id ?: "")) {
-            buildRequest(updateChargingStation, token)
+            buildRequest(token, updateChargingStation)
         }
         val expectedResult = ChargingStationDTO(
             _id = completeChargingStation1._id,
@@ -174,24 +175,23 @@ class ChargingStationTest : FunSpec({
 
     test("delete charging station by id test") {
         val response = client.delete(chargingStationPath(completeChargingStation1._id ?: "")) {
-            buildRequest(token)
+            buildRequest<Unit>(token)
         }
         val wrongResponse = client.delete(chargingStationPath("")) {
-            buildRequest(token)
+            buildRequest<Unit>(token)
         }
         response.status shouldBeEqual HttpStatusCode.OK
         wrongResponse.status shouldBeEqual HttpStatusCode.NotFound
     }
 })
 
-private fun HttpRequestBuilder.buildRequest(token: String?) {
-    if (token != null) {
-        headers { bearerAuth(token) }
-    }
-}
-
-private fun <T> HttpRequestBuilder.buildRequest(body: T, token: String?) {
+private fun <T> HttpRequestBuilder.buildRequest(
+    token: String?,
+    body: T? = null,
+    parametersMap: Map<String, String>? = null
+) {
     if (token != null) headers { bearerAuth(token) }
+    parametersMap?.map { (key, value) -> parameter(key, value) }
     body?.also {
         contentType(ContentType.Application.Json)
         setBody(it)
