@@ -1,12 +1,15 @@
 package infrastructure.charging_station
 
 import application.charging_station.ChargingStationRepository
+import com.mongodb.MongoException
 import com.mongodb.client.model.Filters.*
 import com.mongodb.client.model.FindOneAndReplaceOptions
 import com.mongodb.client.model.ReturnDocument
 import com.mongodb.client.model.geojson.Point
 import com.mongodb.client.model.geojson.Position
 import com.mongodb.client.result.InsertOneResult
+import domain.InternalErrorException
+import domain.NotFoundException
 import domain.charging_station.ChargingStation
 import domain.charging_station.ClosestChargingStationInput
 import domain.charging_station.NearbyChargingStationsInput
@@ -15,78 +18,79 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import org.bson.types.ObjectId
-import java.lang.IllegalArgumentException
 
 class MongoDbChargingStationRepository : ChargingStationRepository {
 
     private companion object {
         const val CHARGING_STATION_NOT_FOUND_MESSAGE = "Charging station not found"
-        const val INVALID_REQUEST_DATA = "Invalid request data"
+        const val OPERATION_FAILED_MESSAGE = "An unexpected error occurred while performing the operation"
     }
 
     private val chargingStations = MongoDb.database.getCollection<ChargingStationDbEntity>("chargingStations")
 
     override fun getNewId(): String = ObjectId().toString()
 
-    override suspend fun listChargingStations(): Collection<ChargingStation> {
-        return chargingStations
+    override suspend fun listChargingStations(): Collection<ChargingStation> = execute {
+        chargingStations
             .find()
             .map { it.toDomain() }
             .toList()
     }
 
-    override suspend fun addChargingStation(chargingStationToAdd: ChargingStation): ChargingStation {
+    override suspend fun addChargingStation(chargingStationToAdd: ChargingStation): ChargingStation = execute {
         val newChargingStation = chargingStationToAdd.toDbEntity()
         chargingStations
             .insertOne(newChargingStation)
             .takeIf(InsertOneResult::wasAcknowledged)
-            ?.let { return newChargingStation.toDomain() }
-        throw IllegalArgumentException(INVALID_REQUEST_DATA)
+            ?.let { return@execute newChargingStation.toDomain() }
+        throw InternalErrorException(OPERATION_FAILED_MESSAGE)
     }
 
-    override suspend fun getChargingStation(chargingStationId: String): ChargingStation {
-        return (chargingStations
+    override suspend fun getChargingStation(chargingStationId: String): ChargingStation = execute {
+        (chargingStations
             .find(eq("_id", ObjectId(chargingStationId)))
             .firstOrNull()
-            ?: throw IllegalArgumentException(CHARGING_STATION_NOT_FOUND_MESSAGE)
+            ?: throw NotFoundException(CHARGING_STATION_NOT_FOUND_MESSAGE)
         ).toDomain()
     }
 
     override suspend fun updateChargingStation(
         chargingStationId: String,
         updatedChargingStation: ChargingStation
-    ): ChargingStation {
-        return chargingStations
+    ): ChargingStation = execute {
+        chargingStations
             .findOneAndReplace(
                 eq("_id", ObjectId(chargingStationId)),
                 updatedChargingStation.toDbEntity(),
                 FindOneAndReplaceOptions().returnDocument(ReturnDocument.AFTER)
             )?.toDomain()
-            ?: throw IllegalArgumentException(CHARGING_STATION_NOT_FOUND_MESSAGE)
+            ?: throw NotFoundException(CHARGING_STATION_NOT_FOUND_MESSAGE)
     }
 
-    override suspend fun deleteChargingStation(chargingStationId: String) {
+    override suspend fun deleteChargingStation(chargingStationId: String) = execute {
         if (!chargingStations
                 .deleteOne(eq("_id", ObjectId(chargingStationId)))
                 .wasAcknowledged()
         ) {
-            throw IllegalArgumentException(CHARGING_STATION_NOT_FOUND_MESSAGE)
+            throw NotFoundException(CHARGING_STATION_NOT_FOUND_MESSAGE)
         }
     }
 
     override suspend fun getNearbyChargingStations(
         nearbyChargingStationsInput: NearbyChargingStationsInput
-    ): Collection<ChargingStation> {
-        return chargingStations
+    ): Collection<ChargingStation> = execute {
+        chargingStations
             .find(
                 and(
                     listOfNotNull(
                         nearSphere(
                             "location",
-                            Point(Position(
-                                nearbyChargingStationsInput.longitude,
-                                nearbyChargingStationsInput.latitude
-                            )),
+                            Point(
+                                Position(
+                                    nearbyChargingStationsInput.longitude,
+                                    nearbyChargingStationsInput.latitude
+                                )
+                            ),
                             null,
                             null
                         ),
@@ -124,6 +128,14 @@ class MongoDbChargingStationRepository : ChargingStationRepository {
                 )
             ).firstOrNull()
             ?.toDomain()
-            ?: throw IllegalArgumentException(CHARGING_STATION_NOT_FOUND_MESSAGE)
+            ?: throw NotFoundException(CHARGING_STATION_NOT_FOUND_MESSAGE)
     }
+
+    private suspend fun <T> execute(block: suspend () -> T): T =
+        try {
+            block()
+        } catch (e: MongoException) {
+            println("MongoDB exception: " + e.message)
+            throw InternalErrorException(OPERATION_FAILED_MESSAGE)
+        }
 }

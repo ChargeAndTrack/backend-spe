@@ -1,5 +1,7 @@
 package domain.charging_station
 
+import domain.InvalidInputException
+
 data class ChargingStationImpl(
     override val id: String,
     override val power: Int,
@@ -9,7 +11,9 @@ data class ChargingStationImpl(
 ) : ChargingStation {
 
     init {
-        require(power > 0) { "Power must be greater than zero."}
+        runCatching {
+            require(power > 0) { "Power must be greater than zero." }
+        }.onFailure { throw InvalidInputException(it.message ?: "Invalid input") }
     }
 
     companion object Factory {

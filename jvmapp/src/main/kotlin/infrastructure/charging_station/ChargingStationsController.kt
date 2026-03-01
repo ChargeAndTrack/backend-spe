@@ -10,71 +10,85 @@ import java.lang.IllegalArgumentException
 
 object ChargingStationsController {
 
-    const val SERVER_ERROR_MESSAGE = "Error adding the charging station"
     val chargingStationService = ChargingStationServiceImpl(MongoDbChargingStationRepository())
 
     suspend fun listChargingStations(call: ApplicationCall) {
         println("Get all charging stations")
-        try {
-            call.respond(
-                HttpStatusCode.OK,
-                chargingStationService.listChargingStations()
-                    .map { it.toDTO() }
-                    .toList()
-            )
-        } catch (_: Exception) {
-            call.respond(HttpStatusCode.InternalServerError, SERVER_ERROR_MESSAGE)
-        }
+        call.respond(
+            HttpStatusCode.OK,
+            chargingStationService.listChargingStations()
+                .map { it.toDTO() }
+                .toList()
+        )
     }
 
-    suspend fun addChargingStation(call: ApplicationCall) =
-        call.execute("Add charging station", HttpStatusCode.Created) {
+    suspend fun addChargingStation(call: ApplicationCall) {
+        println("Add charging station")
+        call.respond(
+            HttpStatusCode.Created,
             chargingStationService.addChargingStation(
                 call.receive<AddChargingStationDTO>()
                     .also { it.validate() }
                     .toInput()
             ).toDTO()
-        }
+        )
+    }
 
-    suspend fun getChargingStation(call: ApplicationCall) =
-        call.execute("Get charging station by id", HttpStatusCode.OK) {
-            chargingStationService.getChargingStation(call.parameters["id"] ?: "").toDTO()
-        }
+    suspend fun getChargingStation(call: ApplicationCall) {
+        println("Get charging station by id")
+        call.respond(
+            HttpStatusCode.OK,
+            chargingStationService.getChargingStation(call.parameters["id"] ?: "")
+                .toDTO()
+        )
+    }
 
-    suspend fun deleteChargingStation(call: ApplicationCall) =
-        call.execute("Delete charging station by id", HttpStatusCode.OK) {
+    suspend fun deleteChargingStation(call: ApplicationCall) {
+        println("Delete charging station by id")
+        call.respond(
+            HttpStatusCode.OK,
             chargingStationService.deleteChargingStation(call.parameters["id"] ?: "")
-            "charging station removed successfully"
-        }
+        )
+    }
 
-    suspend fun updateChargingStation(call: ApplicationCall) =
-        call.execute("Update charging station by id", HttpStatusCode.OK) {
+
+    suspend fun updateChargingStation(call: ApplicationCall) {
+        println("Update charging station by id")
+        call.respond(
+            HttpStatusCode.OK,
             chargingStationService.updateChargingStation(
                 call.parameters["id"] ?: "",
                 call.receive<UpdateChargingStationDTO>()
                     .also { it.validate() }
                     .toInput()
             ).toDTO()
-        }
+        )
+    }
 
-    suspend fun getNearbyChargingStations(call: ApplicationCall) =
-        call.execute("Get nearby charging stations", HttpStatusCode.OK) {
+    suspend fun getNearbyChargingStations(call: ApplicationCall) {
+        println("Get nearby charging stations")
+        call.respond(
+            HttpStatusCode.OK,
             chargingStationService.getNearbyChargingStations(
                 call.request.queryParameters.toNearbyChargingStationDTO()
                     .also { it.validate() }
                     .toInput()
             ).map { it.toDTO() }
             .toList()
-        }
+        )
+    }
 
-    suspend fun getClosestChargingStation(call: ApplicationCall) =
-        call.execute("Get nearby charging stations", HttpStatusCode.OK) {
+    suspend fun getClosestChargingStation(call: ApplicationCall) {
+        print("Get nearby charging stations")
+        call.respond(
+            HttpStatusCode.OK,
             chargingStationService.getClosestChargingStation(
                  call.request.queryParameters.toClosestChargingStationDTO()
                     .also { it.validate() }
                     .toInput()
             ).toDTO()
-        }
+        )
+    }
 
     private fun Parameters.toNearbyChargingStationDTO() = NearbyChargingStationsDTO(
         this["lng"]!!.toDouble(),
@@ -95,12 +109,6 @@ object ChargingStationsController {
         response: suspend () -> T
     ) {
         println(message)
-        try {
-            respond(status, response())
-        } catch (e: IllegalArgumentException) {
-            respond(HttpStatusCode.NotFound, e.message ?: "")
-        } catch (_: Exception) {
-            respond(HttpStatusCode.InternalServerError, SERVER_ERROR_MESSAGE)
-        }
+        respond(status, response())
     }
 }
