@@ -2,6 +2,7 @@ package infrastructure.user
 
 import application.user.CarService
 import application.user.CarServiceImpl
+import domain.InvalidInputException
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.auth.jwt.JWTPrincipal
@@ -14,52 +15,34 @@ object CarController {
 
     suspend fun getCars(call: ApplicationCall) {
         println("getCars")
-        val cars = carService.getCars(getUserId(call))
-        println("Cars: $cars")
-        call.respond(HttpStatusCode.OK, cars.toDTO())
+        call.respond(HttpStatusCode.OK, carService.getCars(getUserId(call)).toDTO())
     }
 
     suspend fun addCar(call: ApplicationCall) {
         println("addCar")
-        val request = call.receive<AddCarDTO>().also { it.validate() }
-        val car = carService.addCar(getUserId(call), request.toInput())
-        println("New car: $car")
-        call.respond(HttpStatusCode.Created, car.toDTO())
+        val body = call.receive<AddCarDTO>().also { it.validate() }
+        call.respond(HttpStatusCode.Created, carService.addCar(getUserId(call), body.toInput()).toDTO())
     }
 
     suspend fun getCar(call: ApplicationCall) = handleCarRequest(call) { carId ->
-        println("getCar, received carId $carId")
-        val car = carService.getCar(getUserId(call), carId)
-        println("Car: $car")
-        call.respond(HttpStatusCode.OK, car.toDTO())
+        println("getCar, carId $carId")
+        call.respond(HttpStatusCode.OK, carService.getCar(getUserId(call), carId).toDTO())
     }
 
     suspend fun updateCar(call: ApplicationCall) = handleCarRequest(call) { carId ->
-        println("updateCar, received carId $carId")
-        val request = call.receive<UpdateCarDTO>().also { it.validate() }
-        val updatedCar = carService.updateCar(getUserId(call), carId, request.toInput())
-        println("UpdatedCar: $updatedCar")
-        call.respond(HttpStatusCode.OK, updatedCar.toDTO())
+        println("updateCar, carId $carId")
+        val body = call.receive<UpdateCarDTO>().also { it.validate() }
+        call.respond(HttpStatusCode.OK, carService.updateCar(getUserId(call), carId, body.toInput()).toDTO())
     }
 
     suspend fun deleteCar(call: ApplicationCall) = handleCarRequest(call) { carId ->
-        println("deleteCar, received carId $carId")
-        val cars = carService.deleteCar(getUserId(call), carId)
-        println("Cars: $cars")
-        call.respond(HttpStatusCode.OK, cars.toDTO())
+        println("deleteCar, carId $carId")
+        call.respond(HttpStatusCode.OK, carService.deleteCar(getUserId(call), carId).toDTO())
     }
 
-    private fun getUserId(call: ApplicationCall): String {
-        val principal = call.principal<JWTPrincipal>()
-        return principal!!.payload.getClaim("userId").asString()
-    }
+    private fun getUserId(call: ApplicationCall): String =
+        call.principal<JWTPrincipal>()!!.payload.getClaim("userId").asString()
 
-    private suspend fun handleCarRequest(call: ApplicationCall, handler: suspend (carId: String) -> Unit) {
-        val carId = call.parameters["id"]
-        if (carId == null) {
-            call.respond(HttpStatusCode.BadRequest)
-            return
-        }
-        handler(carId)
-    }
+    private suspend fun handleCarRequest(call: ApplicationCall, handler: suspend (carId: String) -> Unit) =
+        handler(call.parameters["id"] ?: throw InvalidInputException("Id not provided"))
 }
