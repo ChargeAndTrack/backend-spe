@@ -5,6 +5,7 @@ import domain.user.AddCarInput
 import domain.user.UpdateCarInput
 import domain.user.Car
 import domain.user.User
+import infrastructure.QueryDTO
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -28,10 +29,10 @@ data class CarDTO(
 data class AddCarDTO(
     val plate: String,
     val maxBattery: Int
-) {
-    fun validate() = validate(plate = plate, maxBattery = maxBattery)
+) : QueryDTO<AddCarInput> {
+    override fun validate() = validate(plate = plate, maxBattery = maxBattery)
 
-    fun toInput(): AddCarInput = AddCarInput(plate = plate, maxBattery = maxBattery)
+    override fun toInput(): AddCarInput = AddCarInput(plate = plate, maxBattery = maxBattery)
 }
 
 @Serializable
@@ -39,10 +40,10 @@ data class UpdateCarDTO(
     val plate: String? = null,
     val maxBattery: Int? = null,
     val currentBattery: Int? = null
-) {
-    fun validate() = validate(plate = plate, maxBattery = maxBattery, currentBattery = currentBattery)
+) : QueryDTO<UpdateCarInput> {
+    override fun validate() = validate(plate = plate, maxBattery = maxBattery, currentBattery = currentBattery)
 
-    fun toInput(): UpdateCarInput =
+    override fun toInput(): UpdateCarInput =
         UpdateCarInput(plate = plate, maxBattery = maxBattery, currentBattery = currentBattery)
 }
 

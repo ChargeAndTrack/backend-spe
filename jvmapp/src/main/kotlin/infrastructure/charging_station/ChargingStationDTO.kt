@@ -7,12 +7,8 @@ import domain.charging_station.ClosestChargingStationInput
 import domain.charging_station.Location
 import domain.charging_station.LocationImpl
 import domain.charging_station.NearbyChargingStationsInput
+import infrastructure.QueryDTO
 import kotlinx.serialization.Serializable
-
-interface QueryDTO<T> {
-    fun validate()
-    fun toInput(): T
-}
 
 @Serializable
 data class ChargingStationDTO(
