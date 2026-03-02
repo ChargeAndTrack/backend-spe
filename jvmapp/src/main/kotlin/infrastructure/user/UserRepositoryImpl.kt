@@ -1,6 +1,5 @@
 package infrastructure.user
 
-import domain.user.AddCarInput
 import application.user.UserRepository
 import com.mongodb.MongoException
 import com.mongodb.client.model.Filters.*
@@ -15,10 +14,12 @@ import org.bson.types.ObjectId
 
 class UserRepositoryImpl : UserRepository {
 
-    private val USER_NOT_FOUND_MESSAGE = "User not found"
-    private val CAR_NOT_FOUND_MESSAGE = "Car not found"
-    private val CAR_NOT_DELETED_MESSAGE = "Couldn't delete car"
-    private val OPERATION_FAILED_MESSAGE = "An unexpected error occurred while performing the operation"
+    private companion object {
+        const val USER_NOT_FOUND_MESSAGE = "User not found"
+        const val CAR_NOT_FOUND_MESSAGE = "Car not found"
+        const val CAR_NOT_DELETED_MESSAGE = "Couldn't delete car"
+        const val OPERATION_FAILED_MESSAGE = "An unexpected error occurred while performing the operation"
+    }
 
     private val users = MongoDb.database.getCollection<UserDbEntity>("users")
 
@@ -28,8 +29,8 @@ class UserRepositoryImpl : UserRepository {
         users
             .find(
                 and(
-                    eq<String>("username", username),
-                    eq<String>("password", password)
+                    eq("username", username),
+                    eq("password", password)
                 )
             ).firstOrNull()
             ?.toDomain()
@@ -38,7 +39,7 @@ class UserRepositoryImpl : UserRepository {
 
     private suspend fun getUserDbEntity(userId: String): UserDbEntity = execute {
         users
-            .find(eq<ObjectId>("_id", ObjectId(userId)))
+            .find(eq("_id", ObjectId(userId)))
             .firstOrNull()
             ?: throw NotFoundException(USER_NOT_FOUND_MESSAGE)
     }
@@ -49,7 +50,7 @@ class UserRepositoryImpl : UserRepository {
 
     override suspend fun addCar(userId: String, newCar: Car) = execute {
         users
-            .updateOne(eq<ObjectId>("_id", ObjectId(userId)), push("cars", newCar.toDbEntity()))
+            .updateOne(eq("_id", ObjectId(userId)), push("cars", newCar.toDbEntity()))
             .also { if (it.matchedCount == 0L) { throw NotFoundException(USER_NOT_FOUND_MESSAGE) } }
             .let {}
     }
@@ -61,8 +62,8 @@ class UserRepositoryImpl : UserRepository {
         users
             .findOneAndUpdate(
                 and(
-                    eq<ObjectId>("_id", ObjectId(userId)),
-                    eq<ObjectId>("cars._id", ObjectId(updatedCar.id))
+                    eq("_id", ObjectId(userId)),
+                    eq("cars._id", ObjectId(updatedCar.id))
                 ),
                 set("cars.$", updatedCar.toDbEntity())
             ).let {}
@@ -70,8 +71,8 @@ class UserRepositoryImpl : UserRepository {
 
     override suspend fun deleteCar(userId: String, carId: String): Collection<Car> = execute {
         users.updateOne(
-            eq<ObjectId>("_id", ObjectId(userId)),
-            pull("cars", eq<ObjectId>("_id", ObjectId(carId)))
+            eq("_id", ObjectId(userId)),
+            pull("cars", eq("_id", ObjectId(carId)))
         )
         getCars(userId).takeIf { it.none { it.id == carId } } ?: throw InternalErrorException(CAR_NOT_DELETED_MESSAGE)
     }

@@ -17,7 +17,11 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.*
 
 class CarsTest : FunSpec() {
-    private val CARS_URL = "$BASE_URL/cars"
+
+    private companion object {
+        const val CARS_URL = "$BASE_URL/cars"
+    }
+
     private val carUrl = { id: String -> "$CARS_URL/$id" }
 
     private lateinit var client: HttpClient
