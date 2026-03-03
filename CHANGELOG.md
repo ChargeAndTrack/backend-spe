@@ -1,3 +1,25 @@
+## [0.5.1](https://github.com/ChargeAndTrack/backend-spe/compare/0.5.0...0.5.1) (2026-03-03)
+
+### Bug Fixes
+
+* **charging-stations:** throw InvalidInputException in case of DTOs validation failure and in ChargingStationController respond with BadRequest status code in case of error ([78f3f49](https://github.com/ChargeAndTrack/backend-spe/commit/78f3f49fa486723541316af2b208d9180b15cd80))
+
+### Tests
+
+* **charging-stations:** refactor tests into contexts; add tests for failing operations; delete all charging stations before each context execution ([11683ec](https://github.com/ChargeAndTrack/backend-spe/commit/11683ecfecf5a34f0352ea19f9b592ef2028c5d5))
+
+### Build and continuous integration
+
+* add test steps to build-and-test workflow, configure healthcheck to health endpoint ([0ea9d2e](https://github.com/ChargeAndTrack/backend-spe/commit/0ea9d2ed3012e75760a78701baf9bc155a61a71a))
+
+### Refactoring
+
+* **cars:** move constants into private companion objects ([4e3366c](https://github.com/ChargeAndTrack/backend-spe/commit/4e3366c8065f8ef7b2ccefc906ce6328879c9d2c))
+* **cars:** remove some println and minor refactor ([77fdcf7](https://github.com/ChargeAndTrack/backend-spe/commit/77fdcf770e1cea8828ef85c5296d62108fd7da83))
+* move QueryDTO interface in infrastructure package and use it in UserDTO ([3b27aed](https://github.com/ChargeAndTrack/backend-spe/commit/3b27aed079ab2b43af7aef11160839f537aab10c))
+* **test:** move common setup in a separate object ([91d98fb](https://github.com/ChargeAndTrack/backend-spe/commit/91d98fbb80b3de77882554e9d2d9217962674645))
+* **user:** rename UserRepositoryImpl as MongoDbUserRepository ([0d4e0ad](https://github.com/ChargeAndTrack/backend-spe/commit/0d4e0ad6f7f971364f38a4438a79330fad842127))
+
 ## [0.5.0](https://github.com/ChargeAndTrack/backend-spe/compare/0.4.0...0.5.0) (2026-03-01)
 
 ### Features
