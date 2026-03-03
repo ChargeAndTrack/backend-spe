@@ -12,7 +12,7 @@ import infrastructure.MongoDb
 import kotlinx.coroutines.flow.firstOrNull
 import org.bson.types.ObjectId
 
-class UserRepositoryImpl : UserRepository {
+class MongoDbUserRepository : UserRepository {
 
     private companion object {
         const val USER_NOT_FOUND_MESSAGE = "User not found"

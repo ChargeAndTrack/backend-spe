@@ -11,7 +11,7 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 
 object CarController {
-    private val carService: CarService = CarServiceImpl(UserRepositoryImpl())
+    private val carService: CarService = CarServiceImpl(MongoDbUserRepository())
 
     suspend fun getCars(call: ApplicationCall) {
         println("getCars")
