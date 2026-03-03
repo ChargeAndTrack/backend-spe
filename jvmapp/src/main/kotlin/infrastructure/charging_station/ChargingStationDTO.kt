@@ -1,5 +1,6 @@
 package infrastructure.charging_station
 
+import domain.InvalidInputException
 import domain.charging_station.AddChargingStationInput
 import domain.charging_station.UpdateChargingStationInput
 import domain.charging_station.ChargingStation
@@ -39,10 +40,10 @@ data class AddChargingStationDTO(
 
 @Serializable
 data class UpdateChargingStationDTO(
-    val power: Int?,
-    val available: Boolean?,
-    val enabled: Boolean?,
-    val location: LocationDTO?
+    val power: Int? = null,
+    val available: Boolean? = null,
+    val enabled: Boolean? = null,
+    val location: LocationDTO? = null
 ) : QueryDTO<UpdateChargingStationInput> {
     override fun validate() = validate(power, location)
 
@@ -59,7 +60,7 @@ data class NearbyChargingStationsDTO(
     val longitude: Double,
     val latitude: Double,
     val radius: Double,
-    val onlyEnabled: Boolean?
+    val onlyEnabled: Boolean? = null
 ) : QueryDTO<NearbyChargingStationsInput> {
     override fun validate() = validate(location = LocationDTO(longitude, latitude), radius = radius)
 
@@ -70,7 +71,7 @@ data class NearbyChargingStationsDTO(
 data class ClosestChargingStationDTO(
     val longitude: Double,
     val latitude: Double,
-    val onlyEnabledAndAvailable: Boolean?
+    val onlyEnabledAndAvailable: Boolean? = null
 ) : QueryDTO<ClosestChargingStationInput> {
     override fun validate() = validate(location = LocationDTO(longitude, latitude))
 
@@ -92,10 +93,12 @@ fun ChargingStation.toDTO(): ChargingStationDTO = ChargingStationDTO(
 fun Location.toDTO(): LocationDTO = LocationDTO(longitude, latitude)
 
 private fun validate(power: Int? = null, location: LocationDTO? = null, radius: Double? = null) {
-    power?.also { require(it > 0) { "Power must be greater than zero."} }
-    location?.also {
-        require(it.longitude in -180.0..180.0) { "Longitude must be between -180 and 180 degrees" }
-        require(it.latitude in -90.0..90.0) { "Latitude must be between -90 and 90 degrees" }
-    }
-    radius?.also { require(it > 0) { "Radius must be greater than zero." }}
+    runCatching {
+        power?.also { require(it > 0) { "Power must be greater than zero." } }
+        location?.also {
+            require(it.longitude in -180.0..180.0) { "Longitude must be between -180 and 180 degrees" }
+            require(it.latitude in -90.0..90.0) { "Latitude must be between -90 and 90 degrees" }
+        }
+        radius?.also { require(it > 0) { "Radius must be greater than zero." } }
+    }.onFailure { throw InvalidInputException(it.message ?: "Invalid input") }
 }

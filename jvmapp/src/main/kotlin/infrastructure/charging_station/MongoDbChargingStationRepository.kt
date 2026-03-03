@@ -58,13 +58,11 @@ class MongoDbChargingStationRepository : ChargingStationRepository {
         chargingStationId: String,
         updatedChargingStation: ChargingStation
     ): ChargingStation = execute {
-        chargingStations
-            .findOneAndReplace(
-                eq("_id", ObjectId(chargingStationId)),
-                updatedChargingStation.toDbEntity(),
-                FindOneAndReplaceOptions().returnDocument(ReturnDocument.AFTER)
-            )?.toDomain()
-            ?: throw NotFoundException(CHARGING_STATION_NOT_FOUND_MESSAGE)
+         chargingStations.findOneAndReplace(
+             eq("_id", ObjectId(chargingStationId)),
+             updatedChargingStation.toDbEntity(),
+             FindOneAndReplaceOptions().returnDocument(ReturnDocument.AFTER)
+         )?.toDomain() ?: throw NotFoundException(CHARGING_STATION_NOT_FOUND_MESSAGE)
     }
 
     override suspend fun deleteChargingStation(chargingStationId: String) = execute {

@@ -6,7 +6,6 @@ import io.ktor.http.Parameters
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
-import java.lang.IllegalArgumentException
 
 object ChargingStationsController {
 
@@ -34,30 +33,23 @@ object ChargingStationsController {
         )
     }
 
-    suspend fun getChargingStation(call: ApplicationCall) {
+    suspend fun getChargingStation(call: ApplicationCall) = call.handleChargingStationRequest { chargingStationId ->
         println("Get charging station by id")
-        call.respond(
-            HttpStatusCode.OK,
-            chargingStationService.getChargingStation(call.parameters["id"] ?: "")
-                .toDTO()
-        )
+        call.respond(HttpStatusCode.OK, chargingStationService.getChargingStation(chargingStationId).toDTO())
     }
 
-    suspend fun deleteChargingStation(call: ApplicationCall) {
+    suspend fun deleteChargingStation(call: ApplicationCall) = call.handleChargingStationRequest { chargingStationId ->
         println("Delete charging station by id")
-        call.respond(
-            HttpStatusCode.OK,
-            chargingStationService.deleteChargingStation(call.parameters["id"] ?: "")
-        )
+        call.respond(HttpStatusCode.OK, chargingStationService.deleteChargingStation(chargingStationId))
     }
 
 
-    suspend fun updateChargingStation(call: ApplicationCall) {
+    suspend fun updateChargingStation(call: ApplicationCall) = call.handleChargingStationRequest { chargingStationId ->
         println("Update charging station by id")
         call.respond(
             HttpStatusCode.OK,
             chargingStationService.updateChargingStation(
-                call.parameters["id"] ?: "",
+                chargingStationId,
                 call.receive<UpdateChargingStationDTO>()
                     .also { it.validate() }
                     .toInput()
@@ -90,6 +82,10 @@ object ChargingStationsController {
         )
     }
 
+    private suspend fun ApplicationCall.handleChargingStationRequest(
+        handler: suspend (chargingStationId: String) -> Unit
+    ) = parameters["id"]?.let { handler(it) } ?: respond(HttpStatusCode.BadRequest)
+
     private fun Parameters.toNearbyChargingStationDTO() = NearbyChargingStationsDTO(
         this["lng"]!!.toDouble(),
         this["lat"]!!.toDouble(),
@@ -102,13 +98,4 @@ object ChargingStationsController {
         this["lat"]!!.toDouble(),
         this["onlyEnabledAndAvailable"].toBoolean()
     )
-
-    private suspend inline fun <reified T : Any> ApplicationCall.execute(
-        message: String,
-        status: HttpStatusCode,
-        response: suspend () -> T
-    ) {
-        println(message)
-        respond(status, response())
-    }
 }
