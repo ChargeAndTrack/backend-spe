@@ -2,6 +2,7 @@ package infrastructure
 
 import infrastructure.user.CarController
 import infrastructure.charging_station.ChargingStationsController
+import infrastructure.charging_station.LocationController
 import infrastructure.user.UserController
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.*
@@ -15,6 +16,7 @@ object Router {
             get("/health") { call.respond(HttpStatusCode.OK) }
             val chargingStationPath = "/charging-stations"
             val carsPath = "/cars"
+            val locationPath = "/location"
             route(Config.rootPath ?: "api/v1") {
                 post("/login") { UserController.login(call) }
                 authenticate("auth-jwt") {
@@ -34,6 +36,12 @@ object Router {
                     get(carsPath.assemblePath("{id}")) { CarController.getCar(call) }
                     put(carsPath.assemblePath("{id}")) { CarController.updateCar(call) }
                     delete(carsPath.assemblePath("{id}")) { CarController.deleteCar(call) }
+                    get(locationPath.assemblePath("resolve")) {
+                        LocationController.resolveAddressToLocationCoordinates(call)
+                    }
+                    get(locationPath.assemblePath("reverse")) {
+                        LocationController.reverseLocationCoordinatesToAddress(call)
+                    }
                 }
                 authenticate("auth-admin") {
                     post(chargingStationPath) { ChargingStationsController.addChargingStation(call) }
