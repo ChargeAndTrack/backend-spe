@@ -24,9 +24,9 @@ repositories {
 
 dependencies {
     implementation(libs.bundles.ktor.server)
+    implementation(libs.bundles.ktor.client)
     implementation(libs.bundles.mongodb)
     testImplementation(libs.bundles.kotlin.testing)
-    testImplementation(libs.bundles.ktor.testing)
 }
 
 kotlin {
