@@ -9,12 +9,11 @@ import io.ktor.server.response.respond
 
 object RechargeController {
 
-    val rechargeService: RechargeService = RechargeServiceImpl(MongoDbRechargeRepository(
-        ChargingStationsController.repository
-    ))
+    val rechargeService: RechargeService = RechargeServiceImpl(MongoDbRechargeRepository())
 
     suspend fun startRecharge(call: ApplicationCall) = call.handleRechargeRequest { chargingStationId ->
         println("Start recharge")
+        ChargingStationsController.chargingStationService.getChargingStation(chargingStationId).validateRecharge()
         call.respond(
             HttpStatusCode.OK,
             rechargeService.startRecharge(call.receive<StartRechargeDTO>().toInput(), chargingStationId)
