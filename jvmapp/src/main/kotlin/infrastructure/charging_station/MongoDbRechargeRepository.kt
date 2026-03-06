@@ -1,18 +1,16 @@
 package infrastructure.charging_station
 
-import application.charging_station.ChargingStationRepository
 import application.charging_station.RechargeRepository
 import com.mongodb.MongoException
 import com.mongodb.client.model.Filters.*
 import domain.InternalErrorException
 import domain.InvalidInputException
 import domain.NotFoundException
-import domain.charging_station.ChargingStation
 import domain.charging_station.Recharge
 import infrastructure.MongoDb
 import kotlinx.coroutines.flow.firstOrNull
 
-class MongoDbRechargeRepository(val chargingStationRepository: ChargingStationRepository) : RechargeRepository {
+class MongoDbRechargeRepository : RechargeRepository {
 
     private companion object {
         const val RECHARGE_NOT_FOUND_MESSAGE = "Recharge not found"
@@ -53,7 +51,6 @@ class MongoDbRechargeRepository(val chargingStationRepository: ChargingStationRe
     }
 
     override suspend fun startRecharge(recharge: Recharge) = execute {
-        chargingStationRepository.getChargingStation(recharge.chargingStationId).validateRecharge()
         addRecharge(recharge)
     }
 
@@ -72,9 +69,4 @@ class MongoDbRechargeRepository(val chargingStationRepository: ChargingStationRe
             println("MongoDB exception: " + e.message)
             throw InternalErrorException(OPERATION_FAILED_MESSAGE)
         }
-
-    private fun ChargingStation.validateRecharge() = runCatching {
-        require(available) { "Charging station is not available." }
-        require(enabled) { "Charging station is disabled." }
-    }.onFailure { throw InvalidInputException(it.message ?: "Invalid input") }
 }
