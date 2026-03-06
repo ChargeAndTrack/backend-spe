@@ -2,6 +2,7 @@ package infrastructure
 
 import infrastructure.user.CarController
 import infrastructure.charging_station.ChargingStationsController
+import infrastructure.charging_station.RechargeController
 import infrastructure.user.UserController
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.*
@@ -22,6 +23,12 @@ object Router {
                     get(chargingStationPath) { ChargingStationsController.listChargingStations(call) }
                     get(chargingStationPath.assemblePath("{id}")) {
                         ChargingStationsController.getChargingStation(call)
+                    }
+                    post(chargingStationPath.assemblePath("{id}", "start-recharge")) {
+                        RechargeController.startRecharge(call)
+                    }
+                    post(chargingStationPath.assemblePath("{id}", "stop-recharge")) {
+                        RechargeController.stopRecharge(call)
                     }
                     get(chargingStationPath.assemblePath("near")) {
                         ChargingStationsController.getNearbyChargingStations(call)
