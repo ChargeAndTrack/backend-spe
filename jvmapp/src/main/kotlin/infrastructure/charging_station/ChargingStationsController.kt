@@ -35,7 +35,15 @@ object ChargingStationsController {
 
     suspend fun getChargingStation(call: ApplicationCall) = call.handleChargingStationRequest { chargingStationId ->
         println("Get charging station by id")
-        call.respond(HttpStatusCode.OK, chargingStationService.getChargingStation(chargingStationId).toDTO())
+        call.parameters["without-car-in-charge"]?.let {
+            call.respond(HttpStatusCode.OK, chargingStationService.getChargingStation(chargingStationId).toDTO())
+        }
+        call.respond(
+            HttpStatusCode.OK,
+            chargingStationService.getChargingStation(chargingStationId).toDTO(
+                RechargeController.rechargeService.getCarIdByChargingStationId(chargingStationId)
+            )
+        )
     }
 
     suspend fun deleteChargingStation(call: ApplicationCall) = call.handleChargingStationRequest { chargingStationId ->

@@ -13,11 +13,21 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ChargingStationDTO(
-    val _id: String?,
+    val _id: String,
     val power: Int,
     val available: Boolean = true,
     val enabled: Boolean = true,
     val location: LocationDTO
+)
+
+@Serializable
+data class ChargingStationRechargingDTO(
+    val _id: String,
+    val power: Int,
+    val available: Boolean = true,
+    val enabled: Boolean = true,
+    val location: LocationDTO,
+    val currentCarId: String
 )
 
 @Serializable
@@ -88,6 +98,15 @@ fun ChargingStation.toDTO(): ChargingStationDTO = ChargingStationDTO(
     available = available,
     enabled = enabled,
     location = location.toDTO()
+)
+
+fun ChargingStation.toDTO(currentCarId: String) = ChargingStationRechargingDTO(
+    _id = id,
+    power = power,
+    available = available,
+    enabled = enabled,
+    location = location.toDTO(),
+    currentCarId = currentCarId
 )
 
 fun Location.toDTO(): LocationDTO = LocationDTO(longitude, latitude)
