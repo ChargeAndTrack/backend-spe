@@ -1,0 +1,80 @@
+package infrastructure.charging_station
+
+import application.charging_station.ChargingStationRepository
+import application.charging_station.RechargeRepository
+import com.mongodb.MongoException
+import com.mongodb.client.model.Filters.*
+import domain.InternalErrorException
+import domain.InvalidInputException
+import domain.NotFoundException
+import domain.charging_station.ChargingStation
+import domain.charging_station.Recharge
+import infrastructure.MongoDb
+import kotlinx.coroutines.flow.firstOrNull
+
+class MongoDbRechargeRepository(val chargingStationRepository: ChargingStationRepository) : RechargeRepository {
+
+    private companion object {
+        const val RECHARGE_NOT_FOUND_MESSAGE = "Recharge not found"
+        const val CAR_ALREADY_IN_CHARGE = "Car already in charge"
+        const val OPERATION_FAILED_MESSAGE = "An unexpected error occurred while performing the operation"
+    }
+
+    private val recharges = MongoDb.database.getCollection<RechargeDbEntity>("recharges")
+
+    override suspend fun getChargingStationIdByCarId(carId: String): String = execute {
+        recharges.find(eq("carId", carId)).firstOrNull()?.chargingStationId
+            ?: throw NotFoundException(RECHARGE_NOT_FOUND_MESSAGE)
+    }
+
+    override suspend fun getCarIdByChargingStationId(chargingStationId: String): String = execute {
+        recharges.find(eq("chargingStationId", chargingStationId)).firstOrNull()?.carId
+            ?: throw NotFoundException(RECHARGE_NOT_FOUND_MESSAGE)
+    }
+
+    override suspend fun addRecharge(recharge: Recharge) = execute {
+        recharges.find(eq("carId", recharge.carId)).firstOrNull()?.run {
+            throw InvalidInputException(CAR_ALREADY_IN_CHARGE)
+        }
+        if (!recharges.insertOne(RechargeDbEntity(recharge.carId, recharge.chargingStationId)).wasAcknowledged()) {
+            throw InternalErrorException(OPERATION_FAILED_MESSAGE)
+        }
+    }
+
+
+    override suspend fun deleteRecharge(recharge: Recharge) = execute {
+        if (!recharges.deleteOne(and(
+                eq("carId", recharge.carId),
+                eq("chargingStationId", recharge.chargingStationId)
+            )).wasAcknowledged()
+        ) {
+            throw InternalErrorException(OPERATION_FAILED_MESSAGE)
+        }
+    }
+
+    override suspend fun startRecharge(recharge: Recharge) = execute {
+        chargingStationRepository.getChargingStation(recharge.chargingStationId).validateRecharge()
+        addRecharge(recharge)
+    }
+
+    override suspend fun stopRecharge(recharge: Recharge) = execute {
+        recharges.find(and(
+            eq("carId", recharge.carId),
+            eq("chargingStationId", recharge.chargingStationId)
+        )).firstOrNull() ?: throw NotFoundException(RECHARGE_NOT_FOUND_MESSAGE)
+        deleteRecharge(recharge)
+    }
+
+    private suspend fun <T> execute(block: suspend () -> T): T =
+        try {
+            block()
+        } catch (e: MongoException) {
+            println("MongoDB exception: " + e.message)
+            throw InternalErrorException(OPERATION_FAILED_MESSAGE)
+        }
+
+    private fun ChargingStation.validateRecharge() = runCatching {
+        require(available) { "Charging station is not available." }
+        require(enabled) { "Charging station is disabled." }
+    }.onFailure { throw InvalidInputException(it.message ?: "Invalid input") }
+}
