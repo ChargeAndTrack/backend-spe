@@ -3,6 +3,7 @@ var db = conn.getDB('ChargeAndTrackDB');
 
 db.createCollection('users');
 db.createCollection('chargingStations');
+db.createCollection('recharges');
 
 try {
    db.users.deleteMany( { } );
