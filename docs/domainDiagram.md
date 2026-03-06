@@ -50,12 +50,12 @@ classDiagram
     }
     class Recharge {
         <<interface, value-object>>
-        +car: Car
-        +chargingStation: ChargingStation
+        +carId: String
+        +chargingStationId: String
     }
     Role --* User
     Car --o User
     Location --* ChargingStation
-    Car --o Recharge
-    ChargingStation --o Recharge
+    Car --> Recharge
+    ChargingStation --> Recharge
 ```
