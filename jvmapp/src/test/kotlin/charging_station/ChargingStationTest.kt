@@ -75,8 +75,8 @@ class ChargingStationTest : FunSpec() {
             beforeEach { chargingStation = insertChargingStation(chargingStation1).body<ChargingStationDTO>() }
 
             test("it should get the charging station by id successfully") {
-                val response = client.get(chargingStationPath(chargingStation._id ?: "")) {
-                    buildRequest<Unit>(token)
+                val response = client.get(chargingStationPath(chargingStation._id)) {
+                    buildRequest<Unit>(token, parametersMap = mapOf("without-car-in-charge" to ""))
                 }
                 response.status shouldBeEqual HttpStatusCode.OK
                 response.body<ChargingStationDTO>() shouldBeEqual chargingStation
@@ -84,7 +84,7 @@ class ChargingStationTest : FunSpec() {
 
             test("it should fail to get the charging station with a wrong id") {
                 client.get(chargingStationPath("")) {
-                    buildRequest<Unit>(token)
+                    buildRequest<Unit>(token, parametersMap = mapOf("without-car-in-charge" to ""))
                 }.status shouldBeEqual HttpStatusCode.NotFound
             }
         }
@@ -96,7 +96,7 @@ class ChargingStationTest : FunSpec() {
             beforeEach { chargingStation = insertChargingStation(chargingStation1).body<ChargingStationDTO>() }
 
             test("it should update the charging station by id successfully") {
-                val response = client.put(chargingStationPath(chargingStation._id ?: "")) {
+                val response = client.put(chargingStationPath(chargingStation._id)) {
                     buildRequest(token, updateChargingStation)
                 }
                 response.status shouldBeEqual HttpStatusCode.OK
@@ -116,10 +116,10 @@ class ChargingStationTest : FunSpec() {
             }
 
             test("it should fail to update the charging station with a non-positive power") {
-                client.put(chargingStationPath(chargingStation._id ?: "")) {
+                client.put(chargingStationPath(chargingStation._id)) {
                     buildRequest(token, updateChargingStation.copy(power = 0))
                 }.status shouldBeEqual HttpStatusCode.BadRequest
-                client.put(chargingStationPath(chargingStation._id ?: "")) {
+                client.put(chargingStationPath(chargingStation._id)) {
                     buildRequest(token, updateChargingStation.copy(power = -10))
                 }.status shouldBeEqual HttpStatusCode.BadRequest
             }
@@ -131,7 +131,7 @@ class ChargingStationTest : FunSpec() {
             beforeEach { chargingStation = insertChargingStation(chargingStation1).body<ChargingStationDTO>() }
 
             test("it should delete the charging station successfully") {
-                client.delete(chargingStationPath(chargingStation._id ?: "")) {
+                client.delete(chargingStationPath(chargingStation._id)) {
                     buildRequest<Unit>(token)
                 }.status shouldBeEqual HttpStatusCode.OK
             }
@@ -194,7 +194,7 @@ class ChargingStationTest : FunSpec() {
                         "lat" to 37.00.toString()
                     ))
                 }
-                client.put(chargingStationPath(chargingStations.first()._id ?: "")) {
+                client.put(chargingStationPath(chargingStations.first()._id)) {
                     buildRequest(token, UpdateChargingStationDTO(enabled = false))
                 }
                 val response2 = client.get(chargingStationPath("closest")) {
@@ -221,7 +221,7 @@ class ChargingStationTest : FunSpec() {
         val chargingStations = client.get(chargingStationPath()) { buildRequest<Unit>(token) }
             .body<Collection<ChargingStationDTO>>()
         chargingStations.forEach {
-            client.delete(chargingStationPath(it._id ?: "")) { buildRequest<Unit>(token) }
+            client.delete(chargingStationPath(it._id)) { buildRequest<Unit>(token) }
         }
     }
 
