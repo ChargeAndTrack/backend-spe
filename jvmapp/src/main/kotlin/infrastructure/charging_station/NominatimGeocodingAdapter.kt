@@ -28,7 +28,6 @@ class NominatimGeocodingAdapter : GeocodingPort {
         const val EXTERNAL_SERVICE_ERROR_MESSAGE: String = "Can't contact external service"
         const val COORDINATES_NOT_FOUND_MESSAGE: String = "No coordinates found for the specified address"
         const val LOCATION_NOT_FOUND_MESSAGE: String = "No location information found"
-        const val OPERATION_FAILED_MESSAGE = "An unexpected error occurred while performing the operation"
     }
 
     @Serializable
@@ -117,7 +116,7 @@ class NominatimGeocodingAdapter : GeocodingPort {
             println("NominatimGeocodingAdapter error: ${e.message}")
             throw InternalErrorException(EXTERNAL_SERVICE_ERROR_MESSAGE)
         } catch (e: Throwable) {
-            println("NominatimGeocodingAdapter error: ${e.message}")
-            throw InternalErrorException(OPERATION_FAILED_MESSAGE)
+            println("NominatimGeocodingAdapter unexpected error: ${e.message}")
+            throw InternalErrorException()
         }
 }

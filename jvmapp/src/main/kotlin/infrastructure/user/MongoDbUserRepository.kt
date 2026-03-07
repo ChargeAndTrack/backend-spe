@@ -18,7 +18,6 @@ class MongoDbUserRepository : UserRepository {
         const val USER_NOT_FOUND_MESSAGE = "User not found"
         const val CAR_NOT_FOUND_MESSAGE = "Car not found"
         const val CAR_NOT_DELETED_MESSAGE = "Couldn't delete car"
-        const val OPERATION_FAILED_MESSAGE = "An unexpected error occurred while performing the operation"
     }
 
     private val users = MongoDb.database.getCollection<UserDbEntity>("users")
@@ -82,6 +81,6 @@ class MongoDbUserRepository : UserRepository {
             block()
         } catch (e: MongoException) {
             println("MongoDB exception: " + e.message)
-            throw InternalErrorException(OPERATION_FAILED_MESSAGE)
+            throw InternalErrorException()
         }
 }

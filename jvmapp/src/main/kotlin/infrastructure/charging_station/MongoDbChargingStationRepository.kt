@@ -23,7 +23,6 @@ class MongoDbChargingStationRepository : ChargingStationRepository {
 
     private companion object {
         const val CHARGING_STATION_NOT_FOUND_MESSAGE = "Charging station not found"
-        const val OPERATION_FAILED_MESSAGE = "An unexpected error occurred while performing the operation"
     }
 
     private val chargingStations = MongoDb.database.getCollection<ChargingStationDbEntity>("chargingStations")
@@ -43,7 +42,7 @@ class MongoDbChargingStationRepository : ChargingStationRepository {
             .insertOne(newChargingStation)
             .takeIf(InsertOneResult::wasAcknowledged)
             ?.let { return@execute newChargingStation.toDomain() }
-        throw InternalErrorException(OPERATION_FAILED_MESSAGE)
+        throw InternalErrorException()
     }
 
     override suspend fun getChargingStation(chargingStationId: String): ChargingStation = execute {
@@ -134,6 +133,6 @@ class MongoDbChargingStationRepository : ChargingStationRepository {
             block()
         } catch (e: MongoException) {
             println("MongoDB exception: " + e.message)
-            throw InternalErrorException(OPERATION_FAILED_MESSAGE)
+            throw InternalErrorException()
         }
 }
