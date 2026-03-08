@@ -1,3 +1,19 @@
+## [0.6.0](https://github.com/ChargeAndTrack/backend-spe/compare/0.5.1...0.6.0) (2026-03-08)
+
+### Features
+
+* **location:** add location routes, empty LocationController and new interfaces ([cf29ebb](https://github.com/ChargeAndTrack/backend-spe/commit/cf29ebb334c3dc8c8a2c9219a995bea01c695432))
+* **location:** implement resolve functionality ([24559a6](https://github.com/ChargeAndTrack/backend-spe/commit/24559a6b5e1961c3ac4894ced959f96c6abb724a))
+* **location:** implement reverse functionality, minor refactor ([7f0ab45](https://github.com/ChargeAndTrack/backend-spe/commit/7f0ab457b3b9d0035d646e3a8b015cdb08f455f1))
+
+### Build and continuous integration
+
+* ktor-client dependencies not only in testing ([5cbe9d4](https://github.com/ChargeAndTrack/backend-spe/commit/5cbe9d4a99c0549b033663fc0dbf66f34baba427))
+
+### Refactoring
+
+* add default message in InternalErrorException ([8634da7](https://github.com/ChargeAndTrack/backend-spe/commit/8634da7f05af0dfc09d894c90c8b84b7660ca193))
+
 ## [0.5.1](https://github.com/ChargeAndTrack/backend-spe/compare/0.5.0...0.5.1) (2026-03-03)
 
 ### Bug Fixes
