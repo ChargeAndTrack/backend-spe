@@ -75,6 +75,7 @@ class Server(routing: Application.() -> Unit) {
         Config.port = config.property("ktor.deployment.port").getString().toInt()
         Config.rootPath = config.property("ktor.deployment.rootPath").getString()
         Config.jwtSecret = config.property("jwt.secret").getString()
+        Config.hfSecret = config.property("llm.hfSecret").getString()
     }
 
     private fun JWTAuthenticationProvider.Config.configuration(message: String, validation: (JWTCredential) -> Any?) {
