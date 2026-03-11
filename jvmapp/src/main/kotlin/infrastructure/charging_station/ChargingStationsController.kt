@@ -1,6 +1,9 @@
 package infrastructure.charging_station
 
 import application.charging_station.ChargingStationServiceImpl
+import application.charging_station.RechargeServiceImpl
+import application.user.CarServiceImpl
+import infrastructure.user.MongoDbUserRepository
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.Parameters
 import io.ktor.server.application.ApplicationCall
@@ -9,7 +12,12 @@ import io.ktor.server.response.respond
 
 object ChargingStationsController {
 
-    val chargingStationService = ChargingStationServiceImpl(MongoDbChargingStationRepository())
+    private val chargingStationService = ChargingStationServiceImpl(MongoDbChargingStationRepository())
+    private val rechargeService = RechargeServiceImpl(
+        MongoDbRechargeRepository(),
+        chargingStationService,
+        CarServiceImpl(MongoDbUserRepository())
+    )
 
     suspend fun listChargingStations(call: ApplicationCall) {
         println("Get all charging stations")
@@ -41,7 +49,7 @@ object ChargingStationsController {
         call.respond(
             HttpStatusCode.OK,
             chargingStationService.getChargingStation(chargingStationId).toDTO(
-                RechargeController.rechargeService.getCarIdByChargingStationId(chargingStationId)
+                rechargeService.getCarIdByChargingStationId(chargingStationId)
             )
         )
     }
