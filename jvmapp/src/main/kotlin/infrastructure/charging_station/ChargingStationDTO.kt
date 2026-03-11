@@ -113,7 +113,7 @@ fun Location.toDTO(): LocationDTO = LocationDTO(longitude, latitude)
 
 private fun validate(power: Int? = null, location: LocationDTO? = null, radius: Double? = null) {
     runCatching {
-        power?.also { require(it > 0) { "Power must be greater than zero." } }
+        power?.also { require(it in 1..100) { "Power must be between 1 and 100." } }
         location?.also {
             require(it.longitude in -180.0..180.0) { "Longitude must be between -180 and 180 degrees" }
             require(it.latitude in -90.0..90.0) { "Latitude must be between -90 and 90 degrees" }
