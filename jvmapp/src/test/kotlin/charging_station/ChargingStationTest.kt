@@ -1,11 +1,12 @@
 package charging_station
 
-import Setup.BASE_URL
 import Setup.adminLoginDTO
 import Setup.buildRequest
+import Setup.chargingStationPath
 import Setup.createClient
+import Setup.deleteAllChargingStations
+import Setup.insertChargingStation
 import Setup.loginAndGetToken
-import infrastructure.Router.assemblePath
 import infrastructure.charging_station.AddChargingStationDTO
 import infrastructure.charging_station.ChargingStationDTO
 import infrastructure.charging_station.ChargingStationRechargingDTO
@@ -19,9 +20,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
-import io.ktor.client.request.post
 import io.ktor.client.request.put
-import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
 
 class ChargingStationTest : FunSpec() {
@@ -41,7 +40,7 @@ class ChargingStationTest : FunSpec() {
 
         afterSpec { client.close() }
 
-        beforeEach { deleteAllChargingStations() }
+        beforeEach { deleteAllChargingStations(client, token) }
 
         test("it should list all charging stations successfully") {
             val chargingStations: Collection<ChargingStationRechargingDTO> = insertChargingStations()
@@ -52,7 +51,7 @@ class ChargingStationTest : FunSpec() {
 
         context("add charging station tests") {
             test("it should add a charging station successfully") {
-                val response = insertChargingStation(chargingStation1)
+                val response = insertChargingStation(client, token, chargingStation1)
                 val responseBody = response.body<ChargingStationDTO>()
                 response.status shouldBeEqual HttpStatusCode.Created
                 responseBody.power shouldBeEqual chargingStation1.power
@@ -64,8 +63,8 @@ class ChargingStationTest : FunSpec() {
                     0,
                     LocationDTO(longitude = 50.44, latitude = 37.12)
                 )
-                insertChargingStation(addChargingStation).status shouldBeEqual HttpStatusCode.BadRequest
-                insertChargingStation(addChargingStation.copy(power = -10))
+                insertChargingStation(client, token, addChargingStation).status shouldBeEqual HttpStatusCode.BadRequest
+                insertChargingStation(client, token, addChargingStation.copy(power = -10))
                     .status shouldBeEqual HttpStatusCode.BadRequest
             }
         }
@@ -73,7 +72,9 @@ class ChargingStationTest : FunSpec() {
         context("get charging station tests") {
             lateinit var chargingStation: ChargingStationDTO
 
-            beforeEach { chargingStation = insertChargingStation(chargingStation1).body<ChargingStationDTO>() }
+            beforeEach {
+                chargingStation = insertChargingStation(client, token, chargingStation1).body<ChargingStationDTO>()
+            }
 
             test("it should get the charging station by id successfully") {
                 val response = client.get(chargingStationPath(chargingStation._id)) {
@@ -94,7 +95,9 @@ class ChargingStationTest : FunSpec() {
             val updateChargingStation = UpdateChargingStationDTO(power = 150, available = false)
             lateinit var chargingStation: ChargingStationDTO
 
-            beforeEach { chargingStation = insertChargingStation(chargingStation1).body<ChargingStationDTO>() }
+            beforeEach {
+                chargingStation = insertChargingStation(client, token, chargingStation1).body<ChargingStationDTO>()
+            }
 
             test("it should update the charging station by id successfully") {
                 val response = client.put(chargingStationPath(chargingStation._id)) {
@@ -129,7 +132,9 @@ class ChargingStationTest : FunSpec() {
         context("delete charging station tests") {
             lateinit var chargingStation: ChargingStationDTO
 
-            beforeEach { chargingStation = insertChargingStation(chargingStation1).body<ChargingStationDTO>() }
+            beforeEach {
+                chargingStation = insertChargingStation(client, token, chargingStation1).body<ChargingStationDTO>()
+            }
 
             test("it should delete the charging station successfully") {
                 client.delete(chargingStationPath(chargingStation._id)) {
@@ -216,23 +221,8 @@ class ChargingStationTest : FunSpec() {
         }
     }
 
-    private fun chargingStationPath(vararg paths: String) = BASE_URL.assemblePath("charging-stations", *paths)
-
-    private suspend fun deleteAllChargingStations() {
-        val chargingStations = client.get(chargingStationPath()) { buildRequest<Unit>(token) }
-            .body<Collection<ChargingStationDTO>>()
-        chargingStations.forEach {
-            client.delete(chargingStationPath(it._id)) { buildRequest<Unit>(token) }
-        }
-    }
-
-    private suspend fun insertChargingStation(chargingStationToAdd: AddChargingStationDTO): HttpResponse =
-        client.post(chargingStationPath()) {
-            buildRequest(token, chargingStationToAdd)
-        }
-
     private suspend inline fun <reified T> insertChargingStations(): Collection<T> = listOf(
-        insertChargingStation(chargingStation1),
-        insertChargingStation(chargingStation2)
+        insertChargingStation(client, token,chargingStation1),
+        insertChargingStation(client, token, chargingStation2)
     ).map { it.body<T>() }.toList()
 }
