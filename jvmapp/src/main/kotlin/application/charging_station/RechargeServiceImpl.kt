@@ -1,6 +1,7 @@
 package application.charging_station
 
 import application.user.CarService
+import domain.NotFoundException
 import domain.charging_station.Recharge
 import domain.charging_station.RechargeCompleted
 import domain.charging_station.RechargeEvent
@@ -17,6 +18,10 @@ class RechargeServiceImpl(
     val chargingStationService: ChargingStationService,
     val carService: CarService
 ) : RechargeService {
+
+    private companion object {
+        const val RECHARGE_NOT_FOUND_MESSAGE = "Recharge not found"
+    }
 
     private val recharges = mutableMapOf<Pair<String, String>, Recharge>()
 
@@ -43,6 +48,7 @@ class RechargeServiceImpl(
             rechargeRepository.stopRecharge(it)
             it.stop()
         }.also { recharges.remove(Pair(stopRechargeInput.carId, chargingStationId)) }
+        ?: throw NotFoundException(RECHARGE_NOT_FOUND_MESSAGE)
     }
 
     override suspend fun notifyRechargeEvent(rechargeEvent: RechargeEvent) = when (rechargeEvent) {

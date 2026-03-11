@@ -69,10 +69,7 @@ class RechargeTest : FunSpec() {
             }
 
             test("it should start a recharge successfully") {
-                val startResponse = startRecharge(car._id, chargingStation._id)
-                println(startResponse.bodyAsText())
-                println(startResponse.status)
-                startResponse.status shouldBe HttpStatusCode.OK
+                startRecharge(car._id, chargingStation._id).status shouldBe HttpStatusCode.OK
                 val response = client.get(chargingStationPath(chargingStation._id)) {
                     buildRequest<Unit>(token)
                 }
@@ -80,7 +77,7 @@ class RechargeTest : FunSpec() {
                 response.body<ChargingStationRechargingDTO>() shouldBeEqual ChargingStationRechargingDTO(
                     chargingStation._id,
                     chargingStation.power,
-                    chargingStation.available,
+                    available = false,
                     chargingStation.enabled,
                     chargingStation.location,
                     car._id
