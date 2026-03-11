@@ -64,7 +64,8 @@ data class NearbyChargingStationsDTO(
 ) : QueryDTO<NearbyChargingStationsInput> {
     override fun validate() = validate(location = LocationDTO(longitude, latitude), radius = radius)
 
-    override fun toInput(): NearbyChargingStationsInput = NearbyChargingStationsInput(longitude, latitude, radius, onlyEnabled)
+    override fun toInput(): NearbyChargingStationsInput =
+        NearbyChargingStationsInput(longitude, latitude, radius, onlyEnabled ?: true)
 }
 
 @Serializable
@@ -78,7 +79,7 @@ data class ClosestChargingStationDTO(
     override fun toInput(): ClosestChargingStationInput = ClosestChargingStationInput(
         longitude,
         latitude,
-        onlyEnabledAndAvailable
+        onlyEnabledAndAvailable ?: true
     )
 }
 
@@ -89,6 +90,8 @@ fun ChargingStation.toDTO(): ChargingStationDTO = ChargingStationDTO(
     enabled = enabled,
     location = location.toDTO()
 )
+
+fun Collection<ChargingStation>.toDTO(): Collection<ChargingStationDTO> = map { it.toDTO() }
 
 fun Location.toDTO(): LocationDTO = LocationDTO(longitude, latitude)
 

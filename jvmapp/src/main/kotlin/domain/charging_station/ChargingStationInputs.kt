@@ -16,11 +16,11 @@ data class NearbyChargingStationsInput(
     val longitude: Double,
     val latitude: Double,
     val radius: Double,
-    val onlyEnabled: Boolean?
+    val onlyEnabled: Boolean = true
 )
 
 data class ClosestChargingStationInput(
     val longitude: Double,
     val latitude: Double,
-    val onlyEnabledAndAvailable: Boolean?
+    val onlyEnabledAndAvailable: Boolean = true
 )
