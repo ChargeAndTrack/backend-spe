@@ -88,7 +88,7 @@ class MongoDbChargingStationRepository : ChargingStationRepository {
                                     nearbyChargingStationsInput.latitude
                                 )
                             ),
-                            null,
+                            nearbyChargingStationsInput.radius,
                             null
                         ),
                         if (nearbyChargingStationsInput.onlyEnabled == true) eq("enabled", true) else null
