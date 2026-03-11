@@ -10,3 +10,5 @@ data class UpdateCarInput(
     val maxBattery: Int?,
     val currentBattery: Int?
 )
+
+data class IncrementCarBatteryInput(val batteryToAdd: Int)

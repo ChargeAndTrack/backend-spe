@@ -9,6 +9,7 @@ interface User {
 
     fun addCar(carId: String, addCarInput: AddCarInput): Car
     fun updateCar(carId: String, updateCarInput: UpdateCarInput): Car
+    fun incrementCarBattery(carId: String, incrementCarBatteryInput: IncrementCarBatteryInput): Car
 }
 
 enum class Role(val displayName: String) {

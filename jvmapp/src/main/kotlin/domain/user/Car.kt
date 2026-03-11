@@ -7,4 +7,5 @@ interface Car {
     val currentBattery: Int?
 
     fun update(updateCarInput: UpdateCarInput): Car
+    fun incrementBattery(incrementCarBatteryInput: IncrementCarBatteryInput): Car
 }
