@@ -2,6 +2,7 @@ package infrastructure
 
 import infrastructure.user.CarController
 import infrastructure.charging_station.ChargingStationsController
+import infrastructure.charging_station.LlmController
 import infrastructure.charging_station.RechargeController
 import infrastructure.charging_station.LocationController
 import infrastructure.user.UserController
@@ -18,11 +19,13 @@ object Router {
         val rechargeController = RechargeController()
         val carController = CarController(rechargeController)
         val locationController = LocationController()
+        val llmController = LlmController()
         routing {
             get("/health") { call.respond(HttpStatusCode.OK) }
             val chargingStationPath = "/charging-stations"
             val carsPath = "/cars"
             val locationPath = "/location"
+            val llmPath = "/llm"
             route(Config.rootPath ?: "api/v1") {
                 post("/login") { userController.login(call) }
                 authenticate("auth-jwt") {
@@ -54,6 +57,7 @@ object Router {
                     get(locationPath.assemblePath("reverse")) {
                         locationController.reverseLocationCoordinatesToAddress(call)
                     }
+                    post(llmPath.assemblePath("search")) { llmController.search(call) }
                 }
                 authenticate("auth-admin") {
                     post(chargingStationPath) { chargingStationsController.addChargingStation(call) }
