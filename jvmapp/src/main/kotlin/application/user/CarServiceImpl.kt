@@ -2,6 +2,7 @@ package application.user
 
 import domain.user.AddCarInput
 import domain.user.Car
+import domain.user.IncrementCarBatteryInput
 import domain.user.UpdateCarInput
 
 class CarServiceImpl(private val userRepository: UserRepository) : CarService {
@@ -19,6 +20,14 @@ class CarServiceImpl(private val userRepository: UserRepository) : CarService {
         userRepository.getUser(userId).updateCar(carId, updateCarInput).also {
             userRepository.updateCar(userId, it)
         }
+
+    override suspend fun incrementCarBattery(
+        userId: String,
+        carId: String,
+        incrementCarBatteryInput: IncrementCarBatteryInput
+    ): Car = userRepository.getUser(userId).incrementCarBattery(carId, incrementCarBatteryInput).also {
+        userRepository.updateCar(userId, it)
+    }
 
     override suspend fun deleteCar(userId: String, carId: String): Collection<Car> =
         userRepository.deleteCar(userId, carId)

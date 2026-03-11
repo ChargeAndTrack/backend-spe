@@ -17,6 +17,10 @@ data class CarImpl(
             currentBattery = updateCarInput.currentBattery ?: currentBattery
         )
 
+    override fun incrementBattery(incrementCarBatteryInput: IncrementCarBatteryInput): Car = copy(
+        currentBattery = currentBattery?.plus(incrementCarBatteryInput.batteryToAdd)
+    )
+
     private fun validate() =
         runCatching {
             plate.also {

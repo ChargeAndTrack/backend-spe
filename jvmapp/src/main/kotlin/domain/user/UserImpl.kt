@@ -26,6 +26,9 @@ data class UserImpl(
         return getCar(carId).update(updateCarInput)
     }
 
+    override fun incrementCarBattery(carId: String, incrementCarBatteryInput: IncrementCarBatteryInput): Car =
+        getCar(carId).incrementBattery(incrementCarBatteryInput)
+
     private fun requireUniquePlate(currentCarId: String, newPlate: String?) =
         runCatching { require(isPlateUnique(currentCarId, newPlate)) { NOT_UNIQUE_PLATE_MESSAGE } }
             .onFailure { throw InvalidInputException(it.message ?: "Invalid input") }
