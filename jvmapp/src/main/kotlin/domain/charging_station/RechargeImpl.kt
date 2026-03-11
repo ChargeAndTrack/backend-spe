@@ -1,10 +1,10 @@
 package domain.charging_station
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlin.math.floor
 
 data class RechargeImpl(override val carId: String, override val chargingStationId: String) : Recharge {
@@ -22,15 +22,13 @@ data class RechargeImpl(override val carId: String, override val chargingStation
     override fun removeRechargeObserver(observer: RechargeObserver) { rechargeObservers.remove(observer) }
 
     override suspend fun start(userId: String, startRechargeLogicInput: StartRechargeLogicInput) {
-        rechargeJob = withContext(Dispatchers.Default) {
-            this.launch {
-                while (true) {
-                    delay(calculateTimeForOnePercent(startRechargeLogicInput))
-                    if (startRechargeLogicInput.batteryCapacity + RECHARGE_PERCENTAGE < LIMIT_BATTERY_PERCENTAGE) {
-                        RechargeUpdate(userId, this@RechargeImpl, RECHARGE_PERCENTAGE).notify()
-                    } else {
-                        RechargeCompleted(userId, this@RechargeImpl).notify()
-                    }
+        rechargeJob = CoroutineScope(Dispatchers.Default).launch {
+            while (true) {
+                delay(calculateTimeForOnePercent(startRechargeLogicInput))
+                if (startRechargeLogicInput.batteryCapacity + RECHARGE_PERCENTAGE < LIMIT_BATTERY_PERCENTAGE) {
+                    RechargeUpdate(userId, this@RechargeImpl, RECHARGE_PERCENTAGE).notify()
+                } else {
+                    RechargeCompleted(userId, this@RechargeImpl).notify()
                 }
             }
         }

@@ -18,7 +18,7 @@ data class StartRechargeLogicDTO(
 ) : QueryDTO<StartRechargeLogicInput> {
     override fun validate() {
         runCatching {
-            require(chargingStationPower in 1..100) { "Charging station power must be between 1 and 100." }
+            require(chargingStationPower > 0) { "Charging station power must be greater than 0." }
             require(batteryCapacity > 0) { "Battery capacity must be greater than 0." }
         }.onFailure { throw InvalidInputException(it.message ?: "Invalid input") }
     }
