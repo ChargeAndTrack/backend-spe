@@ -6,21 +6,21 @@ data class AddChargingStationInput(
 )
 
 data class UpdateChargingStationInput(
-    val power: Int?,
-    val available: Boolean?,
-    val enabled: Boolean?,
-    val location: Location?
+    val power: Int? = null,
+    val available: Boolean? = null,
+    val enabled: Boolean? = null,
+    val location: Location? = null
 )
 
 data class NearbyChargingStationsInput(
     val longitude: Double,
     val latitude: Double,
     val radius: Double,
-    val onlyEnabled: Boolean?
+    val onlyEnabled: Boolean? = null
 )
 
 data class ClosestChargingStationInput(
     val longitude: Double,
     val latitude: Double,
-    val onlyEnabledAndAvailable: Boolean?
+    val onlyEnabledAndAvailable: Boolean? = null
 )
