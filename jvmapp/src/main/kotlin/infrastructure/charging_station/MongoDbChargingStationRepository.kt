@@ -11,12 +11,15 @@ import com.mongodb.client.result.InsertOneResult
 import domain.InternalErrorException
 import domain.NotFoundException
 import domain.charging_station.ChargingStation
+import domain.charging_station.ChargingStationFilter
 import domain.charging_station.ClosestChargingStationInput
+import domain.charging_station.MinPowerKwFilter
 import domain.charging_station.NearbyChargingStationsInput
 import infrastructure.MongoDb
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
+import org.bson.conversions.Bson
 import org.bson.types.ObjectId
 
 class MongoDbChargingStationRepository : ChargingStationRepository {
@@ -114,7 +117,9 @@ class MongoDbChargingStationRepository : ChargingStationRepository {
                             null,
                             null
                         )
-                    ) + if (closestChargingStationInput.onlyEnabledAndAvailable == true) {
+                    )
+                    + closestChargingStationInput.filters.mapNotNull { it.toMongoFilter() }
+                    + if (closestChargingStationInput.onlyEnabledAndAvailable) {
                         listOf(
                             eq("enabled", true),
                             eq("available", true)
@@ -127,6 +132,12 @@ class MongoDbChargingStationRepository : ChargingStationRepository {
             ?.toDomain()
             ?: throw NotFoundException(CHARGING_STATION_NOT_FOUND_MESSAGE)
     }
+
+    private fun ChargingStationFilter.toMongoFilter(): Bson? =
+        when (this) {
+            is MinPowerKwFilter -> gte("power", minPowerKw)
+            else -> null
+        }
 
     private suspend fun <T> execute(block: suspend () -> T): T =
         try {
