@@ -26,7 +26,9 @@ class HuggingFaceQueryParsingAdapter : QueryParsingPort {
             { "intent": "NEAR" or "CLOSEST", "address": string, "filters"?: { "minPowerKw"?: int } }
             Meanings: NEAR = searching multiple charging stations, CLOSEST = searching the closest charging station
             """
-        const val EXTERNAL_SERVICE_ERROR_MESSAGE: String = "Can't contact external service"
+        const val NUM_ATTEMPTS = 2
+        const val EXTERNAL_SERVICE_ERROR_MESSAGE = "Can't contact external service"
+        const val INVALID_LLM_RESPONSE = "Invalid LLM response"
     }
 
     @Serializable
@@ -52,28 +54,33 @@ class HuggingFaceQueryParsingAdapter : QueryParsingPort {
 
     override suspend fun parse(query: String): ChargingStationSearchQuery {
         println("Adapter - received query: $query")
-        try {
-            val rawLLMResponse = client
-                .post(HF_URL) {
-                    bearerAuth(HF_SECRET)
-                    contentType(ContentType.Application.Json)
-                    setBody(
-                        LlmRequest(
-                            model = HF_MODEL,
-                            temperature = 0.0,
-                            max_tokens = 300,
-                            messages = listOf(LlmMessage("system", PROMPT), LlmMessage("user", query))
+        for (i in 0..NUM_ATTEMPTS) {
+            try {
+                val rawLLMResponse = client
+                    .post(HF_URL) {
+                        bearerAuth(HF_SECRET)
+                        contentType(ContentType.Application.Json)
+                        setBody(
+                            LlmRequest(
+                                model = HF_MODEL,
+                                temperature = 0.0,
+                                max_tokens = 300,
+                                messages = listOf(LlmMessage("system", PROMPT), LlmMessage("user", query))
+                            )
                         )
-                    )
-                }.checkStatus()
-                .body<LlmResponse>()
-                .choices.first().message.content
-            println("rawLLMResponse: $rawLLMResponse")
-            return json.decodeFromString<ChargingStationQueryDTO>(rawLLMResponse).toInput()
-        } catch (e: Exception) {
-            println("LLM error: ${e.message}")
-            throw e
+                    }.checkStatus()
+                    .body<LlmResponse>()
+                    .choices.first().message.content
+                println("rawLLMResponse: $rawLLMResponse")
+                return json.decodeFromString<ChargingStationQueryDTO>(rawLLMResponse).toInput()
+            } catch (e: Exception) {
+                println("LLM error: ${e.message}")
+                if (i == NUM_ATTEMPTS) {
+                    throw InternalErrorException(INVALID_LLM_RESPONSE)
+                }
+            }
         }
+        throw InternalErrorException()
     }
 
     private fun HttpResponse.checkStatus(): HttpResponse =

@@ -45,12 +45,23 @@ class LlmTest : FunSpec() {
 
         afterSpec { client.close() }
 
-        test("it should get the correct nearest charging stations (no filters)") {
-            val response = makeRequest("Find charging stations near Via dell'Università in Cesena")
-            response.status shouldBe HttpStatusCode.OK
-            val chargingStations: Collection<ChargingStationDTO> = response.body()
-            println("chargingStations: $chargingStations")
-            chargingStations.size shouldBe 2
+        context("search without filters") {
+            test("it should return the nearest charging stations") {
+                val response = makeRequest("Find charging stations near Via dell'Università in Cesena")
+                response.status shouldBe HttpStatusCode.OK
+                val chargingStations: Collection<ChargingStationDTO> = response.body()
+                println("chargingStations: $chargingStations")
+                chargingStations.size shouldBe 2
+            }
+
+            test("it should return the closest charging station") {
+                val response = makeRequest("Find the closest charging station to Via dell'Università in Cesena")
+                response.status shouldBe HttpStatusCode.OK
+                val chargingStations: Collection<ChargingStationDTO> = response.body()
+                println("chargingStations: $chargingStations")
+                chargingStations.size shouldBe 1
+                chargingStations.first().location shouldBe chargingStation2.location
+            }
         }
     }
 
