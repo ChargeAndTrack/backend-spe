@@ -12,9 +12,11 @@ import infrastructure.charging_station.AddChargingStationDTO
 import infrastructure.charging_station.ChargingStationDTO
 import infrastructure.charging_station.LocationDTO
 import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.ints.shouldBeAtLeast
 import io.kotest.matchers.shouldBe
 import io.ktor.client.*
 import io.ktor.client.call.body
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.request.*
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.*
@@ -22,6 +24,7 @@ import io.ktor.http.*
 class LlmTest : FunSpec() {
     private companion object {
         const val LLM_SEARCH_URL = "$BASE_URL/llm/search"
+        const val REQUEST_TIMEOUT_MILLIS: Long = 60_000
     }
 
     private lateinit var client: HttpClient
@@ -34,7 +37,7 @@ class LlmTest : FunSpec() {
 
     init {
         beforeSpec {
-            client = createClient()
+            client = createClient().config { install(HttpTimeout) { requestTimeoutMillis = REQUEST_TIMEOUT_MILLIS } }
             adminToken = loginAndGetToken(client, adminLoginDTO)
             adminToken.isNotEmpty() shouldBe true
             userToken = loginAndGetToken(client, userLoginDTO)
@@ -50,7 +53,6 @@ class LlmTest : FunSpec() {
                 val response = makeRequest("Find charging stations near Via dell'Università in Cesena")
                 response.status shouldBe HttpStatusCode.OK
                 val chargingStations: Collection<ChargingStationDTO> = response.body()
-                println("chargingStations: $chargingStations")
                 chargingStations.size shouldBe 2
             }
 
@@ -58,9 +60,32 @@ class LlmTest : FunSpec() {
                 val response = makeRequest("Find the closest charging station to Via dell'Università in Cesena")
                 response.status shouldBe HttpStatusCode.OK
                 val chargingStations: Collection<ChargingStationDTO> = response.body()
-                println("chargingStations: $chargingStations")
                 chargingStations.size shouldBe 1
                 chargingStations.first().location shouldBe chargingStation2.location
+            }
+        }
+
+        context("search with filters") {
+            val minPower = 100
+
+            test("it should return the nearest charging stations filtered by minimum power") {
+                val response = makeRequest(
+                    "Find charging stations near Via dell'Università in Cesena with power greater than $minPower kW"
+                )
+                response.status shouldBe HttpStatusCode.OK
+                val chargingStations: Collection<ChargingStationDTO> = response.body()
+                chargingStations.forEach { it.power shouldBeAtLeast minPower }
+            }
+
+            test("it should return the closest charging station filtered by minimum power") {
+                val response = makeRequest(
+                    "Find the closest charging station to Via dell'Università in Cesena with power greater than"
+                            + "$minPower kW"
+                )
+                response.status shouldBe HttpStatusCode.OK
+                val chargingStations: Collection<ChargingStationDTO> = response.body()
+                chargingStations.size shouldBe 1
+                chargingStations.first().power shouldBeAtLeast minPower
             }
         }
     }

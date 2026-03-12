@@ -22,5 +22,6 @@ data class NearbyChargingStationsInput(
 data class ClosestChargingStationInput(
     val longitude: Double,
     val latitude: Double,
-    val onlyEnabledAndAvailable: Boolean = true
+    val onlyEnabledAndAvailable: Boolean = true,
+    val filters: Collection<ChargingStationFilter> = emptyList()
 )

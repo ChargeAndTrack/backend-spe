@@ -16,25 +16,19 @@ class SearchChargingStationsServiceImpl(val queryParsingPort: QueryParsingPort) 
     private val locationService = LocationController.locationService
 
     override suspend fun search(query: String): Collection<ChargingStation> {
-        val chargingStationQuery = queryParsingPort.parse(query)
-        println("ChargingStationQuery: $chargingStationQuery")
-        val location = locationService.resolveAddressToLocationCoordinates(chargingStationQuery.address)
-        println("Location: $location")
-        return when (chargingStationQuery.intent) {
-            Intent.NEAR -> {
-                println("Near: $location with radius $DEFAULT_RADIUS")
+        val searchQuery = queryParsingPort.parse(query)
+        val location = locationService.resolveAddressToLocationCoordinates(searchQuery.address)
+        return when (searchQuery.intent) {
+            Intent.NEAR -> searchQuery.filter(
                 chargingStationService.getNearbyChargingStations(
-                    NearbyChargingStationsInput(
-                        location.longitude, location.latitude, DEFAULT_RADIUS
-                    )
+                    NearbyChargingStationsInput(location.longitude, location.latitude, DEFAULT_RADIUS)
                 )
-            }
-            Intent.CLOSEST -> {
-                println("Closest: $location")
-                listOf(chargingStationService.getClosestChargingStation(ClosestChargingStationInput(
-                    location.longitude, location.latitude
-                )))
-            }
+            )
+            Intent.CLOSEST -> listOf(
+                chargingStationService.getClosestChargingStation(
+                    ClosestChargingStationInput(location.longitude, location.latitude, filters = searchQuery.filters)
+                )
+            )
         }
     }
 }

@@ -53,7 +53,7 @@ class HuggingFaceQueryParsingAdapter : QueryParsingPort {
     private val json = Json { ignoreUnknownKeys = true }
 
     override suspend fun parse(query: String): ChargingStationSearchQuery {
-        println("Adapter - received query: $query")
+        println("Query: $query")
         for (i in 0..NUM_ATTEMPTS) {
             try {
                 val rawLLMResponse = client
