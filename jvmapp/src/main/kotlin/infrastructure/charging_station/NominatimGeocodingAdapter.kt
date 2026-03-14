@@ -8,24 +8,18 @@ import domain.charging_station.Address
 import domain.charging_station.AddressImpl
 import domain.charging_station.Location
 import domain.charging_station.LocationImpl
-import io.ktor.client.HttpClient
+import infrastructure.AbstractExternalServiceAdapter
 import io.ktor.client.call.body
-import io.ktor.client.engine.cio.CIO
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.*
-import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpHeaders
-import io.ktor.http.isSuccess
-import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 
-class NominatimGeocodingAdapter : GeocodingPort {
+class NominatimGeocodingAdapter : AbstractExternalServiceAdapter(), GeocodingPort {
 
     private companion object {
-        const val BASE_URL: String = "https://nominatim.openstreetmap.org/"
+        const val BASE_URL: String = "https://nominatim.openstreetmap.org"
         const val USER_AGENT: String = "ChargeAndTrack/1.0"
-        const val EXTERNAL_SERVICE_ERROR_MESSAGE: String = "Can't contact external service"
+
         const val COORDINATES_NOT_FOUND_MESSAGE: String = "No coordinates found for the specified address"
         const val LOCATION_NOT_FOUND_MESSAGE: String = "No location information found"
     }
@@ -60,16 +54,6 @@ class NominatimGeocodingAdapter : GeocodingPort {
         )
     }
 
-    private val client = HttpClient(CIO) {
-        install(ContentNegotiation) {
-            json(Json {
-                prettyPrint = true
-                isLenient = true
-                ignoreUnknownKeys = true
-            })
-        }
-    }
-
     override suspend fun geocode(address: String): Location = execute {
         client
             .get("$BASE_URL/search") {
@@ -101,21 +85,13 @@ class NominatimGeocodingAdapter : GeocodingPort {
         header(HttpHeaders.UserAgent, USER_AGENT)
     }
 
-    private fun HttpResponse.checkStatus(): HttpResponse =
-        this.also {
-            if (!status.isSuccess()) {
-                println("Can't contact '$BASE_URL/search': ${status.description}")
-                throw InternalErrorException(EXTERNAL_SERVICE_ERROR_MESSAGE)
-            }
-        }
-
     private suspend fun <T> execute(block: suspend () -> T): T =
         try {
             block()
         } catch (e: InvalidInputException) {
             println("NominatimGeocodingAdapter error: ${e.message}")
             throw InternalErrorException(EXTERNAL_SERVICE_ERROR_MESSAGE)
-        } catch (e: Throwable) {
+        } catch (e: Exception) {
             println("NominatimGeocodingAdapter unexpected error: ${e.message}")
             throw InternalErrorException()
         }
