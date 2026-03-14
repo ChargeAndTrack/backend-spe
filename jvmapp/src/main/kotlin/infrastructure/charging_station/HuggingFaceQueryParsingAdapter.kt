@@ -72,7 +72,7 @@ class HuggingFaceQueryParsingAdapter : QueryParsingPort {
                     .body<LlmResponse>()
                     .choices.first().message.content
                 println("rawLLMResponse: $rawLLMResponse")
-                return json.decodeFromString<ChargingStationQueryDTO>(rawLLMResponse).toInput()
+                return json.decodeFromString<ChargingStationQueryDTO>(rawLLMResponse).toDomainEntity()
             } catch (e: Exception) {
                 println("LLM error: ${e.message}")
                 if (i == NUM_ATTEMPTS) {

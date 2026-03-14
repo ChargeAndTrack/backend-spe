@@ -8,7 +8,7 @@ import domain.charging_station.ClosestChargingStationInput
 import domain.charging_station.Location
 import domain.charging_station.LocationImpl
 import domain.charging_station.NearbyChargingStationsInput
-import infrastructure.QueryDTO
+import infrastructure.AbstractQueryDTO
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -32,10 +32,10 @@ data class LocationDTO(
 data class AddChargingStationDTO(
     val power: Int,
     val location: LocationDTO
-) : QueryDTO<AddChargingStationInput> {
-    override fun validate() = validate(power, location)
+) : AbstractQueryDTO<AddChargingStationInput>() {
+    override fun internalValidation() = validate(power, location)
 
-    override fun toInput(): AddChargingStationInput = AddChargingStationInput(power, location.toDomain())
+    override fun toDomainEntity(): AddChargingStationInput = AddChargingStationInput(power, location.toDomain())
 }
 
 @Serializable
@@ -44,10 +44,10 @@ data class UpdateChargingStationDTO(
     val available: Boolean? = null,
     val enabled: Boolean? = null,
     val location: LocationDTO? = null
-) : QueryDTO<UpdateChargingStationInput> {
-    override fun validate() = validate(power, location)
+) : AbstractQueryDTO<UpdateChargingStationInput>() {
+    override fun internalValidation() = validate(power, location)
 
-    override fun toInput(): UpdateChargingStationInput = UpdateChargingStationInput(
+    override fun toDomainEntity(): UpdateChargingStationInput = UpdateChargingStationInput(
         power = power,
         available = available,
         enabled = enabled,
@@ -61,10 +61,10 @@ data class NearbyChargingStationsDTO(
     val latitude: Double,
     val radius: Double,
     val onlyEnabled: Boolean? = null
-) : QueryDTO<NearbyChargingStationsInput> {
-    override fun validate() = validate(location = LocationDTO(longitude, latitude), radius = radius)
+) : AbstractQueryDTO<NearbyChargingStationsInput>() {
+    override fun internalValidation() = validate(location = LocationDTO(longitude, latitude), radius = radius)
 
-    override fun toInput(): NearbyChargingStationsInput =
+    override fun toDomainEntity(): NearbyChargingStationsInput =
         NearbyChargingStationsInput(longitude, latitude, radius, onlyEnabled ?: true)
 }
 
@@ -73,10 +73,10 @@ data class ClosestChargingStationDTO(
     val longitude: Double,
     val latitude: Double,
     val onlyEnabledAndAvailable: Boolean? = null
-) : QueryDTO<ClosestChargingStationInput> {
-    override fun validate() = validate(location = LocationDTO(longitude, latitude))
+) : AbstractQueryDTO<ClosestChargingStationInput>() {
+    override fun internalValidation() = validate(location = LocationDTO(longitude, latitude))
 
-    override fun toInput(): ClosestChargingStationInput = ClosestChargingStationInput(
+    override fun toDomainEntity(): ClosestChargingStationInput = ClosestChargingStationInput(
         longitude,
         latitude,
         onlyEnabledAndAvailable ?: true
@@ -96,12 +96,10 @@ fun Collection<ChargingStation>.toDTO(): Collection<ChargingStationDTO> = map { 
 fun Location.toDTO(): LocationDTO = LocationDTO(longitude, latitude)
 
 private fun validate(power: Int? = null, location: LocationDTO? = null, radius: Double? = null) {
-    runCatching {
-        power?.also { require(it > 0) { "Power must be greater than zero." } }
-        location?.also {
-            require(it.longitude in -180.0..180.0) { "Longitude must be between -180 and 180 degrees" }
-            require(it.latitude in -90.0..90.0) { "Latitude must be between -90 and 90 degrees" }
-        }
-        radius?.also { require(it > 0) { "Radius must be greater than zero." } }
-    }.onFailure { throw InvalidInputException(it.message ?: "Invalid input") }
+    power?.also { require(it > 0) { "Power must be greater than zero." } }
+    location?.also {
+        require(it.longitude in -180.0..180.0) { "Longitude must be between -180 and 180 degrees" }
+        require(it.latitude in -90.0..90.0) { "Latitude must be between -90 and 90 degrees" }
+    }
+    radius?.also { require(it > 0) { "Radius must be greater than zero." } }
 }

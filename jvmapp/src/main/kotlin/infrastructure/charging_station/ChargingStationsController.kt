@@ -28,7 +28,7 @@ object ChargingStationsController {
             chargingStationService.addChargingStation(
                 call.receive<AddChargingStationDTO>()
                     .also { it.validate() }
-                    .toInput()
+                    .toDomainEntity()
             ).toDTO()
         )
     }
@@ -52,7 +52,7 @@ object ChargingStationsController {
                 chargingStationId,
                 call.receive<UpdateChargingStationDTO>()
                     .also { it.validate() }
-                    .toInput()
+                    .toDomainEntity()
             ).toDTO()
         )
     }
@@ -64,7 +64,7 @@ object ChargingStationsController {
             chargingStationService.getNearbyChargingStations(
                 call.request.queryParameters.toNearbyChargingStationDTO()
                     .also { it.validate() }
-                    .toInput()
+                    .toDomainEntity()
             ).map { it.toDTO() }
             .toList()
         )
@@ -77,7 +77,7 @@ object ChargingStationsController {
             chargingStationService.getClosestChargingStation(
                  call.request.queryParameters.toClosestChargingStationDTO()
                     .also { it.validate() }
-                    .toInput()
+                    .toDomainEntity()
             ).toDTO()
         )
     }

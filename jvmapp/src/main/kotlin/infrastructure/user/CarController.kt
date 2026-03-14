@@ -21,7 +21,7 @@ object CarController {
     suspend fun addCar(call: ApplicationCall) {
         println("addCar")
         val body = call.receive<AddCarDTO>().also { it.validate() }
-        call.respond(HttpStatusCode.Created, carService.addCar(getUserId(call), body.toInput()).toDTO())
+        call.respond(HttpStatusCode.Created, carService.addCar(getUserId(call), body.toDomainEntity()).toDTO())
     }
 
     suspend fun getCar(call: ApplicationCall) = handleCarRequest(call) { carId ->
@@ -32,7 +32,7 @@ object CarController {
     suspend fun updateCar(call: ApplicationCall) = handleCarRequest(call) { carId ->
         println("updateCar, carId $carId")
         val body = call.receive<UpdateCarDTO>().also { it.validate() }
-        call.respond(HttpStatusCode.OK, carService.updateCar(getUserId(call), carId, body.toInput()).toDTO())
+        call.respond(HttpStatusCode.OK, carService.updateCar(getUserId(call), carId, body.toDomainEntity()).toDTO())
     }
 
     suspend fun deleteCar(call: ApplicationCall) = handleCarRequest(call) { carId ->
