@@ -32,7 +32,11 @@ class Server(routing: Application.() -> Unit) {
         loadConfiguration()
     }
 
-    private val server = embeddedServer(Netty, host = Config.host ?: "0.0.0.0", port = Config.port ?: 3000) {
+    private val server = embeddedServer(
+        Netty,
+        host = Config.Deployment.host ?: "0.0.0.0",
+        port = Config.Deployment.port ?: 3000
+    ) {
         install(ContentNegotiation) {
             json(Json {
                 prettyPrint = true
@@ -71,15 +75,18 @@ class Server(routing: Application.() -> Unit) {
 
     private fun loadConfiguration() {
         val config = HoconApplicationConfig(ConfigFactory.load())
-        Config.host = config.property("ktor.deployment.host").getString()
-        Config.port = config.property("ktor.deployment.port").getString().toInt()
-        Config.rootPath = config.property("ktor.deployment.rootPath").getString()
-        Config.jwtSecret = config.property("jwt.secret").getString()
-        Config.hfSecret = config.property("llm.hfSecret").getString()
+        Config.Deployment.host = config.property("ktor.deployment.host").getString()
+        Config.Deployment.port = config.property("ktor.deployment.port").getString().toInt()
+        Config.Deployment.rootPath = config.property("ktor.deployment.rootPath").getString()
+        Config.Jwt.secret = config.property("jwt.secret").getString()
+        Config.Llm.hfSecret = config.property("llm.hfSecret").getString()
+        Config.Llm.hfModel = config.property("llm.hfModel").getString()
+        Config.Llm.temperature = config.property("llm.temperature").getString().toDouble()
+        Config.Llm.maxTokens = config.property("llm.maxTokens").getString().toInt()
     }
 
     private fun JWTAuthenticationProvider.Config.configuration(message: String, validation: (JWTCredential) -> Any?) {
-        verifier(JWT.require(Algorithm.HMAC256(Config.jwtSecret)).build())
+        verifier(JWT.require(Algorithm.HMAC256(Config.Jwt.secret)).build())
         validate { validation(it) }
         challenge { _, _ -> call.respond(HttpStatusCode.Unauthorized, message) }
     }

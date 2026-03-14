@@ -32,7 +32,7 @@ object Router {
             val carsPath = "/cars"
             val locationPath = "/location"
             val llmPath = "/llm"
-            route(Config.rootPath ?: "api/v1") {
+            route(Config.Deployment.rootPath ?: "api/v1") {
                 post("/login") { userController.login(call) }
                 authenticate("auth-jwt") {
                     get("/user") { userController.getUser(call) }

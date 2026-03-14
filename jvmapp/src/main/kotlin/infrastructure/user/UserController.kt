@@ -24,7 +24,7 @@ class UserController {
             .withClaim("userId", user.id)
             .withClaim("userRole", user.role.displayName)
             .withExpiresAt(Date(System.currentTimeMillis() + 3.days.inWholeMilliseconds))
-            .sign(Algorithm.HMAC256(Config.jwtSecret))
+            .sign(Algorithm.HMAC256(Config.Jwt.secret))
         call.respond(
             HttpStatusCode.OK,
             LoginResponseDTO(user.role.displayName, token)
