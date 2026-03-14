@@ -14,17 +14,17 @@ import kotlinx.serialization.json.Json
 class HuggingFaceQueryParsingAdapter : AbstractExternalServiceAdapter(), QueryParsingPort {
 
     private companion object {
-        val HF_SECRET = Config.hfSecret ?: throw InternalErrorException("HF secret is required")
         const val HF_URL = "https://router.huggingface.co/v1/chat/completions"
-        const val HF_MODEL = "Qwen/Qwen2.5-7B-Instruct:together"
+        val HF_MODEL = Config.Llm.hfModel ?: "Qwen/Qwen2.5-7B-Instruct:together"
+        val HF_SECRET = Config.Llm.hfSecret ?: throw InternalErrorException("HF secret is required")
+        val DEFAULT_TEMPERATURE = Config.Llm.temperature ?: 0.0
+        val DEFAULT_MAX_TOKENS = Config.Llm.maxTokens ?: 300
         const val PROMPT = """
             You are a charging stations query parser. You have to return ONLY a valid JSON following this schema:
             { "intent": "NEAR" or "CLOSEST", "address": string, "filters"?: { "minPowerKw"?: int } }
             Meanings: NEAR = searching multiple charging stations, CLOSEST = searching the closest charging station
             """
         const val NUM_ATTEMPTS = 3
-        const val DEFAULT_TEMPERATURE = 0.0
-        const val DEFAULT_MAX_TOKENS = 300
 
         const val INVALID_LLM_RESPONSE_MESSAGE = "Invalid LLM response"
     }
