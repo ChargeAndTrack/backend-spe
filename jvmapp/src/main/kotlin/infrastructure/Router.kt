@@ -1,10 +1,14 @@
 package infrastructure
 
+import application.charging_station.ChargingStationServiceImpl
+import application.charging_station.LocationServiceImpl
 import infrastructure.user.CarController
 import infrastructure.charging_station.ChargingStationsController
 import infrastructure.charging_station.LlmController
 import infrastructure.charging_station.RechargeController
 import infrastructure.charging_station.LocationController
+import infrastructure.charging_station.MongoDbChargingStationRepository
+import infrastructure.charging_station.NominatimGeocodingAdapter
 import infrastructure.user.UserController
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.*
@@ -14,12 +18,14 @@ import io.ktor.server.routing.*
 
 object Router {
     val module: Application.() -> Unit = {
+        val chargingStationService = ChargingStationServiceImpl(MongoDbChargingStationRepository())
+        val locationService = LocationServiceImpl(NominatimGeocodingAdapter())
         val userController = UserController()
-        val chargingStationsController = ChargingStationsController()
+        val chargingStationsController = ChargingStationsController(chargingStationService)
         val rechargeController = RechargeController()
         val carController = CarController(rechargeController)
-        val locationController = LocationController()
-        val llmController = LlmController()
+        val locationController = LocationController(locationService)
+        val llmController = LlmController(chargingStationService, locationService)
         routing {
             get("/health") { call.respond(HttpStatusCode.OK) }
             val chargingStationPath = "/charging-stations"

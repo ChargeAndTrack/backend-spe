@@ -1,6 +1,6 @@
 package infrastructure.charging_station
 
-import application.charging_station.ChargingStationServiceImpl
+import application.charging_station.ChargingStationService
 import application.charging_station.RechargeServiceImpl
 import application.user.CarServiceImpl
 import infrastructure.Socket
@@ -11,9 +11,8 @@ import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 
-class ChargingStationsController {
+class ChargingStationsController(val chargingStationService: ChargingStationService) {
 
-    private val chargingStationService = ChargingStationServiceImpl(MongoDbChargingStationRepository())
     private val rechargeService = RechargeServiceImpl(
         MongoDbRechargeRepository(),
         chargingStationService,
@@ -38,7 +37,7 @@ class ChargingStationsController {
             chargingStationService.addChargingStation(
                 call.receive<AddChargingStationDTO>()
                     .also { it.validate() }
-                    .toInput()
+                    .toDomainEntity()
             ).toDTO()
         )
     }
@@ -67,7 +66,7 @@ class ChargingStationsController {
                 chargingStationId,
                 call.receive<UpdateChargingStationDTO>()
                     .also { it.validate() }
-                    .toInput()
+                    .toDomainEntity()
             ).toDTO()
         )
     }
@@ -79,7 +78,7 @@ class ChargingStationsController {
             chargingStationService.getNearbyChargingStations(
                 call.request.queryParameters.toNearbyChargingStationDTO()
                     .also { it.validate() }
-                    .toInput()
+                    .toDomainEntity()
             ).map { it.toDTO(rechargeService.getCarIdByChargingStationId(it.id)) }
             .toList()
         )
@@ -92,7 +91,7 @@ class ChargingStationsController {
             chargingStationService.getClosestChargingStation(
                  call.request.queryParameters.toClosestChargingStationDTO()
                     .also { it.validate() }
-                    .toInput()
+                    .toDomainEntity()
             ).let { it.toDTO(rechargeService.getCarIdByChargingStationId(it.id)) }
         )
     }

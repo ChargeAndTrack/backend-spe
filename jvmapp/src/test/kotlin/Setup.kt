@@ -61,7 +61,7 @@ object Setup {
         val chargingStations = client.get(chargingStationPath()) { buildRequest<Unit>(token) }
             .body<Collection<ChargingStationDTO>>()
         chargingStations.forEach {
-            client.delete(chargingStationPath(it._id ?: "")) { buildRequest<Unit>(token) }
+            client.delete(chargingStationPath(it._id)) { buildRequest<Unit>(token) }
         }
     }
 

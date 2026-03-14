@@ -34,8 +34,8 @@ class RechargeController {
             HttpStatusCode.OK,
             rechargeService.startRecharge(
                 call.getUserId(),
-                request.toInput(),
-                StartRechargeLogicDTO(chargingStation.power, car.maxBattery, Random.nextInt(100)).toInput(),
+                request.toDomainEntity(),
+                StartRechargeLogicDTO(chargingStation.power, car.maxBattery, Random.nextInt(100)).toDomainEntity(),
                 chargingStationId
             )
         )
@@ -45,7 +45,7 @@ class RechargeController {
         println("Stop recharge")
         call.respond(
             HttpStatusCode.OK,
-            rechargeService.stopRecharge(call.receive<StopRechargeDTO>().toInput(), chargingStationId)
+            rechargeService.stopRecharge(call.receive<StopRechargeDTO>().toDomainEntity(), chargingStationId)
         )
     }
 

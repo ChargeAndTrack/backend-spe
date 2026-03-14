@@ -1,7 +1,6 @@
 package infrastructure.charging_station
 
 import application.charging_station.LocationService
-import application.charging_station.LocationServiceImpl
 import domain.InvalidInputException
 import domain.charging_station.Location
 import domain.charging_station.LocationImpl
@@ -10,8 +9,7 @@ import io.ktor.http.Parameters
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.response.respond
 
-class LocationController {
-    val locationService: LocationService = LocationServiceImpl(NominatimGeocodingAdapter())
+class LocationController(val locationService: LocationService) {
 
     suspend fun resolveAddressToLocationCoordinates(call: ApplicationCall) {
         println("resolve")

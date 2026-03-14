@@ -5,7 +5,7 @@ import domain.charging_station.ChargingStation
 import domain.charging_station.StartRechargeInput
 import domain.charging_station.StartRechargeLogicInput
 import domain.charging_station.StopRechargeInput
-import infrastructure.QueryDTO
+import infrastructure.AbstractQueryDTO
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -16,15 +16,13 @@ data class StartRechargeLogicDTO(
     val chargingStationPower: Int,
     val batteryCapacity: Int,
     val currentCarBattery: Int
-) : QueryDTO<StartRechargeLogicInput> {
-    override fun validate() {
-        runCatching {
-            require(chargingStationPower > 0) { "Charging station power must be greater than 0." }
-            require(batteryCapacity > 0) { "Battery capacity must be greater than 0." }
-        }.onFailure { throw InvalidInputException(it.message ?: "Invalid input") }
+) : AbstractQueryDTO<StartRechargeLogicInput>() {
+    override fun internalValidation() {
+        require(chargingStationPower > 0) { "Charging station power must be greater than 0." }
+        require(batteryCapacity > 0) { "Battery capacity must be greater than 0." }
     }
 
-    override fun toInput(): StartRechargeLogicInput = StartRechargeLogicInput(
+    override fun toDomainEntity(): StartRechargeLogicInput = StartRechargeLogicInput(
         chargingStationPower,
         batteryCapacity,
         currentCarBattery
@@ -32,17 +30,17 @@ data class StartRechargeLogicDTO(
 }
 
 @Serializable
-data class StartRechargeDTO(val carId: String) : QueryDTO<StartRechargeInput> {
-    override fun validate() {}
+data class StartRechargeDTO(val carId: String) : AbstractQueryDTO<StartRechargeInput>() {
+    override fun internalValidation() {}
 
-    override fun toInput(): StartRechargeInput = StartRechargeInput(carId)
+    override fun toDomainEntity(): StartRechargeInput = StartRechargeInput(carId)
 }
 
 @Serializable
-data class StopRechargeDTO(val carId: String) : QueryDTO<StopRechargeInput> {
-    override fun validate() {}
+data class StopRechargeDTO(val carId: String) : AbstractQueryDTO<StopRechargeInput>() {
+    override fun internalValidation() {}
 
-    override fun toInput(): StopRechargeInput = StopRechargeInput(carId)
+    override fun toDomainEntity(): StopRechargeInput = StopRechargeInput(carId)
 }
 
 fun ChargingStation.validateRecharge() = runCatching {
