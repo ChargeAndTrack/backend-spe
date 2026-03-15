@@ -8,6 +8,8 @@ import domain.InternalErrorException
 import domain.InvalidInputException
 import domain.NotFoundException
 import domain.user.Role
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.engine.*
@@ -20,6 +22,7 @@ import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.jwt.jwt
 import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.response.respond
 import kotlinx.serialization.json.Json
@@ -36,6 +39,14 @@ class Server(routing: Application.() -> Unit) {
                 isLenient = true
                 ignoreUnknownKeys = true
             })
+        }
+        install(CORS) {
+            allowHost("localhost:4173")
+            allowHost("localhost:5173")
+            allowHeader(HttpHeaders.ContentType)
+            allowHeader(HttpHeaders.Authorization)
+            allowMethod(HttpMethod.Put)
+            allowMethod(HttpMethod.Delete)
         }
         install(Authentication) {
             jwt("auth-jwt") {
