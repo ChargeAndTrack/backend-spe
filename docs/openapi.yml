@@ -437,6 +437,32 @@ paths:
         '404':
           description: no location information found
 
+  /llm/search:
+    post:
+      tags:
+        - llm
+      description: Search charging stations using LLM
+      operationId: search
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Charging station(s) found
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChargingStation'
+        '404':
+          description: No charging stations found
+        '500':
+          description: Invalid LLM response
+
 components:
   schemas:
     User:
