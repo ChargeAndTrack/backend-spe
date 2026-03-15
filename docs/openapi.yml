@@ -386,63 +386,56 @@ paths:
         '404':
           description: charging station not found
 
-  /charging-stations/{id}/start-recharge:
-    post:
+  /location/resolve:
+    get:
       tags:
-        - charging-station
-      description: Start recharging a car at a charging station
-      operationId: startRecharge
+        - location
+      description: Get location coordinates from address
+      operationId: resolveAddressToLocationCoordinates
       parameters:
-        - name: id
-          in: path
+        - name: q
+          in: query
           required: true
           schema:
             type: string
-      requestBody:
-        description: car data
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                carId:
-                  type: string
       responses:
         '200':
-          description: recharge started successfully
-        '400':
-          description: charging station not available
+          description: coordinates retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Location'
         '404':
-          description: charging station or car not found
+          description: address not found
 
-  /charging-stations/{id}/stop-recharge:
-    post:
+  /location/reverse:
+    get:
       tags:
-        - charging-station
-      description: Stop recharging a car at a charging station
-      operationId: stopRecharge
+        - location
+      description: Get address from location coordinates
+      operationId: reverseLocationCoordinatesToAddress
       parameters:
-        - name: id
-          in: path
+        - name: lat
+          in: query
           required: true
           schema:
-            type: string
-      requestBody:
-        description: car data
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                carId:
-                  type: string
+            type: number
+            format: float
+        - name: lng
+          in: query
+          required: true
+          schema:
+            type: number
+            format: float
       responses:
         '200':
-          description: recharge stopped successfully
+          description: address retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Address'
         '404':
-          description: charging station not found
+          description: no location information found
 
 components:
   schemas:
@@ -525,3 +518,18 @@ components:
         latitude:
           type: number
           format: float
+    Address:
+      type: object
+      properties:
+        street:
+          type: string
+        houseNumber:
+          type: string
+        city:
+          type: string
+        postalCode:
+          type: string
+        region:
+          type: string
+        country:
+          type: string
