@@ -10,7 +10,7 @@ import kotlin.math.floor
 data class RechargeImpl(override val carId: String, override val chargingStationId: String) : Recharge {
     private companion object {
         const val RECHARGE_PERCENTAGE = 1
-        const val PERCENT_CHANGE = (RECHARGE_PERCENTAGE / 100).toDouble()
+        const val PERCENT_CHANGE = RECHARGE_PERCENTAGE.toDouble() / 100.0
         const val LIMIT_BATTERY_PERCENTAGE = 100
     }
 
@@ -24,8 +24,8 @@ data class RechargeImpl(override val carId: String, override val chargingStation
     override suspend fun start(userId: String, startRechargeLogicInput: StartRechargeLogicInput) {
         rechargeJob = CoroutineScope(Dispatchers.Default).launch {
             while (true) {
-                delay(calculateTimeForOnePercent(startRechargeLogicInput))
-                if (startRechargeLogicInput.batteryCapacity + RECHARGE_PERCENTAGE < LIMIT_BATTERY_PERCENTAGE) {
+                delay(timeToRechargeOnePercent(startRechargeLogicInput))
+                if (startRechargeLogicInput.currentCarBattery + RECHARGE_PERCENTAGE < LIMIT_BATTERY_PERCENTAGE) {
                     RechargeUpdate(userId, this@RechargeImpl, RECHARGE_PERCENTAGE).notify()
                 } else {
                     RechargeCompleted(userId, this@RechargeImpl).notify()
@@ -40,7 +40,7 @@ data class RechargeImpl(override val carId: String, override val chargingStation
 
     private fun Double.convertHoursIntoMs(): Double = this * 60 * 60 * 1000
 
-    private fun calculateTimeForOnePercent(startRechargeLogicInput: StartRechargeLogicInput): Long = floor(
+    private fun timeToRechargeOnePercent(startRechargeLogicInput: StartRechargeLogicInput): Long = floor(
         ((startRechargeLogicInput.batteryCapacity * PERCENT_CHANGE) / startRechargeLogicInput.chargingStationPower)
             .convertHoursIntoMs()
     ).toLong()

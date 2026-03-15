@@ -20,23 +20,19 @@ class MongoDbRechargeRepository : RechargeRepository {
 
     private val recharges = MongoDb.database.getCollection<RechargeDbEntity>("recharges")
 
-    override suspend fun getChargingStationIdByCarId(carId: String): String = execute {
+    override suspend fun getChargingStationIdByCarId(carId: String): String? = execute {
         recharges.find(eq("carId", carId)).firstOrNull()?.chargingStationId
-            ?: throw NotFoundException(RECHARGE_NOT_FOUND_MESSAGE)
     }
 
-    override suspend fun getCarIdByChargingStationId(chargingStationId: String): String = execute {
+    override suspend fun getCarIdByChargingStationId(chargingStationId: String): String? = execute {
         recharges.find(eq("chargingStationId", chargingStationId)).firstOrNull()?.carId
-            ?: throw NotFoundException(RECHARGE_NOT_FOUND_MESSAGE)
     }
 
     override suspend fun addRecharge(recharge: Recharge) = execute {
         recharges.find(eq("carId", recharge.carId)).firstOrNull()?.run {
             throw InvalidInputException(CAR_ALREADY_IN_CHARGE)
         }
-        if (!recharges.insertOne(RechargeDbEntity(recharge.carId, recharge.chargingStationId)).wasAcknowledged()) {
-            throw InternalErrorException(OPERATION_FAILED_MESSAGE)
-        }
+        recharges.insertOne(RechargeDbEntity(recharge.carId, recharge.chargingStationId)).let {}
     }
 
 

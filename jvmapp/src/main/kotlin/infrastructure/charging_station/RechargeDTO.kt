@@ -14,7 +14,8 @@ data class RechargeDTO(val carId: String, val chargingStationId: String)
 @Serializable
 data class StartRechargeLogicDTO(
     val chargingStationPower: Int,
-    val batteryCapacity: Int
+    val batteryCapacity: Int,
+    val currentCarBattery: Int
 ) : QueryDTO<StartRechargeLogicInput> {
     override fun validate() {
         runCatching {
@@ -23,7 +24,11 @@ data class StartRechargeLogicDTO(
         }.onFailure { throw InvalidInputException(it.message ?: "Invalid input") }
     }
 
-    override fun toInput(): StartRechargeLogicInput = StartRechargeLogicInput(chargingStationPower, batteryCapacity)
+    override fun toInput(): StartRechargeLogicInput = StartRechargeLogicInput(
+        chargingStationPower,
+        batteryCapacity,
+        currentCarBattery
+    )
 }
 
 @Serializable

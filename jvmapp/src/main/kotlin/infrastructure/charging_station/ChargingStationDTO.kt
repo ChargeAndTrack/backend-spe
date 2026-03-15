@@ -27,7 +27,7 @@ data class ChargingStationRechargingDTO(
     val available: Boolean = true,
     val enabled: Boolean = true,
     val location: LocationDTO,
-    val currentCarId: String
+    val currentCarId: String? = null
 )
 
 @Serializable
@@ -100,7 +100,7 @@ fun ChargingStation.toDTO(): ChargingStationDTO = ChargingStationDTO(
     location = location.toDTO()
 )
 
-fun ChargingStation.toDTO(currentCarId: String) = ChargingStationRechargingDTO(
+fun ChargingStation.toDTO(currentCarId: String? = null) = ChargingStationRechargingDTO(
     _id = id,
     power = power,
     available = available,

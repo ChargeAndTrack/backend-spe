@@ -22,7 +22,8 @@ data class CarDTO(
     val _id: String,
     var plate: String,
     var maxBattery: Int,
-    var currentBattery: Int?
+    var currentBattery: Int?,
+    var currentChargingStationId: String?
 )
 
 @Serializable
@@ -58,7 +59,13 @@ fun User.toDTO(): UserDTO =
 
 fun Collection<Car>.toDTO() = map { it.toDTO() }
 
-fun Car.toDTO(): CarDTO = CarDTO(_id = id, plate = plate, maxBattery = maxBattery, currentBattery = currentBattery)
+fun Car.toDTO(currentChargingStationId: String? = null): CarDTO = CarDTO(
+    _id = id,
+    plate = plate,
+    maxBattery = maxBattery,
+    currentBattery = currentBattery,
+    currentChargingStationId = currentChargingStationId
+)
 
 private fun validate(plate: String? = null, maxBattery: Int? = null, currentBattery: Int? = null) =
     runCatching {

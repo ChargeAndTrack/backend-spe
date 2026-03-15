@@ -12,6 +12,7 @@ import domain.charging_station.StartRechargeInput
 import domain.charging_station.StopRechargeInput
 import domain.charging_station.UpdateChargingStationInput
 import domain.user.IncrementCarBatteryInput
+import domain.user.UpdateCarInput
 
 class RechargeServiceImpl(
     val rechargeRepository: RechargeRepository,
@@ -25,10 +26,10 @@ class RechargeServiceImpl(
 
     private val recharges = mutableMapOf<Pair<String, String>, Recharge>()
 
-    override suspend fun getChargingStationIdByCarId(carId: String): String =
+    override suspend fun getChargingStationIdByCarId(carId: String): String? =
         rechargeRepository.getChargingStationIdByCarId(carId)
 
-    override suspend fun getCarIdByChargingStationId(chargingStationId: String): String =
+    override suspend fun getCarIdByChargingStationId(chargingStationId: String): String? =
         rechargeRepository.getCarIdByChargingStationId(chargingStationId)
 
     override suspend fun startRecharge(
@@ -38,6 +39,11 @@ class RechargeServiceImpl(
         chargingStationId: String
     ) = RechargeImpl(startRechargeInput.carId, chargingStationId).let {
         rechargeRepository.startRecharge(it)
+        carService.updateCar(
+            userId,
+            startRechargeInput.carId,
+            UpdateCarInput(currentBattery = startRechargeLogicInput.currentCarBattery)
+        )
         it.addRechargeObserver(this)
         it.start(userId, startRechargeLogicInput)
         recharges[Pair(startRechargeInput.carId, chargingStationId)] = it

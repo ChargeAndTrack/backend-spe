@@ -7,9 +7,9 @@ import domain.charging_station.StopRechargeInput
 
 interface RechargeService : RechargeObserver {
 
-    suspend fun getChargingStationIdByCarId(carId: String): String
+    suspend fun getChargingStationIdByCarId(carId: String): String?
 
-    suspend fun getCarIdByChargingStationId(chargingStationId: String): String
+    suspend fun getCarIdByChargingStationId(chargingStationId: String): String?
 
     suspend fun startRecharge(
         userId: String,

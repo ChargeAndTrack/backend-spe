@@ -6,9 +6,9 @@ data class AddCarInput(
 )
 
 data class UpdateCarInput(
-    val plate: String?,
-    val maxBattery: Int?,
-    val currentBattery: Int?
+    val plate: String? = null,
+    val maxBattery: Int? = null,
+    val currentBattery: Int? = null
 )
 
 data class IncrementCarBatteryInput(val batteryToAdd: Int)

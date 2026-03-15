@@ -3,6 +3,8 @@ package infrastructure.user
 import application.user.CarService
 import application.user.CarServiceImpl
 import domain.InvalidInputException
+import domain.user.Car
+import infrastructure.charging_station.RechargeController
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.auth.jwt.JWTPrincipal
@@ -26,7 +28,11 @@ object CarController {
 
     suspend fun getCar(call: ApplicationCall) = handleCarRequest(call) { carId ->
         println("getCar, carId $carId")
-        call.respond(HttpStatusCode.OK, carService.getCar(getUserId(call), carId).toDTO())
+        call.respond(
+            HttpStatusCode.OK,
+            carService.getCar(getUserId(call), carId)
+                .toDTO(RechargeController.rechargeService.getChargingStationIdByCarId(carId))
+        )
     }
 
     suspend fun updateCar(call: ApplicationCall) = handleCarRequest(call) { carId ->
@@ -38,6 +44,10 @@ object CarController {
     suspend fun deleteCar(call: ApplicationCall) = handleCarRequest(call) { carId ->
         println("deleteCar, carId $carId")
         call.respond(HttpStatusCode.OK, carService.deleteCar(getUserId(call), carId).toDTO())
+    }
+
+    private suspend fun Collection<Car>.toDTO() = map {
+        it.toDTO(RechargeController.rechargeService.getChargingStationIdByCarId(it.id))
     }
 
     private fun getUserId(call: ApplicationCall): String =

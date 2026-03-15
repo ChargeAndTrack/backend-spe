@@ -10,18 +10,24 @@ import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
+import kotlin.random.Random
 
 object RechargeController {
 
     private val chargingStationService = ChargingStationServiceImpl(MongoDbChargingStationRepository())
     private val carService = CarServiceImpl(MongoDbUserRepository())
-    private val rechargeService = RechargeServiceImpl(MongoDbRechargeRepository(), chargingStationService, carService)
+    val rechargeService = RechargeServiceImpl(
+        MongoDbRechargeRepository(),
+        chargingStationService,
+        carService
+    )
 
     suspend fun startRecharge(call: ApplicationCall) = call.handleRechargeRequest { chargingStationId ->
         println("Start recharge")
         val request = call.receive<StartRechargeDTO>()
         val chargingStation = chargingStationService.getChargingStation(chargingStationId)
         chargingStation.validateRecharge()
+        val car = carService.getCar(call.getUserId(), request.carId)
         call.respond(
             HttpStatusCode.OK,
             rechargeService.startRecharge(
@@ -29,7 +35,8 @@ object RechargeController {
                 request.toInput(),
                 StartRechargeLogicDTO(
                     chargingStation.power,
-                    carService.getCar(call.getUserId(), request.carId).maxBattery
+                    car.maxBattery,
+                    car.currentBattery ?: Random.nextInt(100),
                 ).toInput(),
                 chargingStationId
             )
