@@ -17,7 +17,8 @@ import domain.user.UpdateCarInput
 class RechargeServiceImpl(
     val rechargeRepository: RechargeRepository,
     val chargingStationService: ChargingStationService,
-    val carService: CarService
+    val carService: CarService,
+    val rechargeEventObserver: RechargeEventObserver
 ) : RechargeService {
 
     private companion object {
@@ -44,38 +45,46 @@ class RechargeServiceImpl(
             startRechargeInput.carId,
             UpdateCarInput(currentBattery = startRechargeLogicInput.currentCarBattery)
         )
+        chargingStationService.updateChargingStation(chargingStationId, UpdateChargingStationInput(available = false))
         it.addRechargeObserver(this)
         it.start(userId, startRechargeLogicInput)
         recharges[Pair(startRechargeInput.carId, chargingStationId)] = it
     }
 
-    override suspend fun stopRecharge(stopRechargeInput: StopRechargeInput, chargingStationId: String) {
+    override suspend fun stopRecharge(stopRechargeInput: StopRechargeInput, chargingStationId: String) =
         recharges[Pair(stopRechargeInput.carId, chargingStationId)]?.let {
-            rechargeRepository.stopRecharge(it)
+            it.stopHandler()
             it.stop()
-        }.also { recharges.remove(Pair(stopRechargeInput.carId, chargingStationId)) }
-        ?: throw NotFoundException(RECHARGE_NOT_FOUND_MESSAGE)
-    }
+        } ?: throw NotFoundException(RECHARGE_NOT_FOUND_MESSAGE)
 
     override suspend fun notifyRechargeEvent(rechargeEvent: RechargeEvent) = when (rechargeEvent) {
         is RechargeUpdate -> {
+            println("Recharge update")
             carService.incrementCarBattery(
                 rechargeEvent.userId,
                 rechargeEvent.recharge.carId,
                 IncrementCarBatteryInput(rechargeEvent.percentageToAdd)
             )
-            chargingStationService.updateChargingStation(
-                rechargeEvent.recharge.chargingStationId,
-                UpdateChargingStationInput(available = false)
+            rechargeEventObserver.rechargeUpdate(
+                rechargeEvent.recharge,
+                carService.getCar(rechargeEvent.userId, rechargeEvent.recharge.carId).currentBattery
+                    ?: throw IllegalStateException("Car battery cannot be null")
             )
         }
         is RechargeCompleted -> {
-            rechargeRepository.stopRecharge(rechargeEvent.recharge)
-            chargingStationService.updateChargingStation(
-                rechargeEvent.recharge.chargingStationId,
-                UpdateChargingStationInput(available = true)
-            )
+            println("Recharge completed")
+            rechargeEvent.recharge.stopHandler()
+            rechargeEventObserver.rechargeCompleted(rechargeEvent.recharge)
         }
         else -> throw IllegalArgumentException("Unknown recharge event $rechargeEvent")
     }.let {}
+
+    private suspend fun Recharge.stopHandler() {
+        rechargeRepository.stopRecharge(this)
+        chargingStationService.updateChargingStation(
+            chargingStationId,
+            UpdateChargingStationInput(available = true)
+        )
+        recharges.remove(Pair(carId, chargingStationId))
+    }
 }

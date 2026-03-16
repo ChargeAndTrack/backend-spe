@@ -14,7 +14,7 @@ import io.ktor.server.response.*
 import java.util.Date
 import kotlin.time.Duration.Companion.days
 
-object UserController {
+class UserController {
     private val userService: UserService = UserServiceImpl(MongoDbUserRepository())
 
     suspend fun login(call: ApplicationCall) {

@@ -12,7 +12,7 @@ import io.ktor.server.auth.principal
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 
-object CarController {
+class CarController(private val rechargeController: RechargeController) {
     private val carService: CarService = CarServiceImpl(MongoDbUserRepository())
 
     suspend fun getCars(call: ApplicationCall) {
@@ -31,7 +31,7 @@ object CarController {
         call.respond(
             HttpStatusCode.OK,
             carService.getCar(getUserId(call), carId)
-                .toDTO(RechargeController.rechargeService.getChargingStationIdByCarId(carId))
+                .toDTO(rechargeController.rechargeService.getChargingStationIdByCarId(carId))
         )
     }
 
@@ -47,7 +47,7 @@ object CarController {
     }
 
     private suspend fun Collection<Car>.toDTO() = map {
-        it.toDTO(RechargeController.rechargeService.getChargingStationIdByCarId(it.id))
+        it.toDTO(rechargeController.rechargeService.getChargingStationIdByCarId(it.id))
     }
 
     private fun getUserId(call: ApplicationCall): String =

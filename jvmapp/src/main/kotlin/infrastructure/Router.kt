@@ -13,50 +13,55 @@ import io.ktor.server.routing.*
 
 object Router {
     val module: Application.() -> Unit = {
+        val userController = UserController()
+        val chargingStationsController = ChargingStationsController()
+        val rechargeController = RechargeController()
+        val carController = CarController(rechargeController)
+        val locationController = LocationController()
         routing {
             get("/health") { call.respond(HttpStatusCode.OK) }
             val chargingStationPath = "/charging-stations"
             val carsPath = "/cars"
             val locationPath = "/location"
             route(Config.rootPath ?: "api/v1") {
-                post("/login") { UserController.login(call) }
+                post("/login") { userController.login(call) }
                 authenticate("auth-jwt") {
-                    get("/user") { UserController.getUser(call) }
-                    get(chargingStationPath) { ChargingStationsController.listChargingStations(call) }
+                    get("/user") { userController.getUser(call) }
+                    get(chargingStationPath) { chargingStationsController.listChargingStations(call) }
                     get(chargingStationPath.assemblePath("{id}")) {
-                        ChargingStationsController.getChargingStation(call)
+                        chargingStationsController.getChargingStation(call)
                     }
                     post(chargingStationPath.assemblePath("{id}", "start-recharge")) {
-                        RechargeController.startRecharge(call)
+                        rechargeController.startRecharge(call)
                     }
                     post(chargingStationPath.assemblePath("{id}", "stop-recharge")) {
-                        RechargeController.stopRecharge(call)
+                        rechargeController.stopRecharge(call)
                     }
                     get(chargingStationPath.assemblePath("near")) {
-                        ChargingStationsController.getNearbyChargingStations(call)
+                        chargingStationsController.getNearbyChargingStations(call)
                     }
                     get(chargingStationPath.assemblePath("closest")) {
-                        ChargingStationsController.getClosestChargingStation(call)
+                        chargingStationsController.getClosestChargingStation(call)
                     }
-                    get(carsPath) { CarController.getCars(call) }
-                    post(carsPath) { CarController.addCar(call) }
-                    get(carsPath.assemblePath("{id}")) { CarController.getCar(call) }
-                    put(carsPath.assemblePath("{id}")) { CarController.updateCar(call) }
-                    delete(carsPath.assemblePath("{id}")) { CarController.deleteCar(call) }
+                    get(carsPath) { carController.getCars(call) }
+                    post(carsPath) { carController.addCar(call) }
+                    get(carsPath.assemblePath("{id}")) { carController.getCar(call) }
+                    put(carsPath.assemblePath("{id}")) { carController.updateCar(call) }
+                    delete(carsPath.assemblePath("{id}")) { carController.deleteCar(call) }
                     get(locationPath.assemblePath("resolve")) {
-                        LocationController.resolveAddressToLocationCoordinates(call)
+                        locationController.resolveAddressToLocationCoordinates(call)
                     }
                     get(locationPath.assemblePath("reverse")) {
-                        LocationController.reverseLocationCoordinatesToAddress(call)
+                        locationController.reverseLocationCoordinatesToAddress(call)
                     }
                 }
                 authenticate("auth-admin") {
-                    post(chargingStationPath) { ChargingStationsController.addChargingStation(call) }
+                    post(chargingStationPath) { chargingStationsController.addChargingStation(call) }
                     delete(chargingStationPath.assemblePath("{id}")) {
-                        ChargingStationsController.deleteChargingStation(call)
+                        chargingStationsController.deleteChargingStation(call)
                     }
                     put(chargingStationPath.assemblePath("{id}")) {
-                        ChargingStationsController.updateChargingStation(call)
+                        chargingStationsController.updateChargingStation(call)
                     }
                 }
             }

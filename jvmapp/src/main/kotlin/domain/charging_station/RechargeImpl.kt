@@ -16,19 +16,23 @@ data class RechargeImpl(override val carId: String, override val chargingStation
 
     private val rechargeObservers = mutableListOf<RechargeObserver>()
     private lateinit var rechargeJob: Job
+    private var currentBattery = 0
 
     override fun addRechargeObserver(observer: RechargeObserver) { rechargeObservers.add(observer) }
 
     override fun removeRechargeObserver(observer: RechargeObserver) { rechargeObservers.remove(observer) }
 
     override suspend fun start(userId: String, startRechargeLogicInput: StartRechargeLogicInput) {
+        currentBattery = startRechargeLogicInput.currentCarBattery
         rechargeJob = CoroutineScope(Dispatchers.Default).launch {
             while (true) {
                 delay(timeToRechargeOnePercent(startRechargeLogicInput))
-                if (startRechargeLogicInput.currentCarBattery + RECHARGE_PERCENTAGE < LIMIT_BATTERY_PERCENTAGE) {
+                if (currentBattery + RECHARGE_PERCENTAGE < LIMIT_BATTERY_PERCENTAGE) {
+                    currentBattery += RECHARGE_PERCENTAGE
                     RechargeUpdate(userId, this@RechargeImpl, RECHARGE_PERCENTAGE).notify()
                 } else {
                     RechargeCompleted(userId, this@RechargeImpl).notify()
+                    stop()
                 }
             }
         }

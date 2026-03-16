@@ -10,7 +10,7 @@ import io.ktor.http.Parameters
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.response.respond
 
-object LocationController {
+class LocationController {
     private val locationService: LocationService = LocationServiceImpl(NominatimGeocodingAdapter())
 
     suspend fun resolveAddressToLocationCoordinates(call: ApplicationCall) {

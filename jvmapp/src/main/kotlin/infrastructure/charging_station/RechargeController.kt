@@ -3,6 +3,7 @@ package infrastructure.charging_station
 import application.charging_station.ChargingStationServiceImpl
 import application.charging_station.RechargeServiceImpl
 import application.user.CarServiceImpl
+import infrastructure.Socket
 import infrastructure.user.MongoDbUserRepository
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
@@ -12,14 +13,15 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import kotlin.random.Random
 
-object RechargeController {
+class RechargeController {
 
     private val chargingStationService = ChargingStationServiceImpl(MongoDbChargingStationRepository())
     private val carService = CarServiceImpl(MongoDbUserRepository())
     val rechargeService = RechargeServiceImpl(
         MongoDbRechargeRepository(),
         chargingStationService,
-        carService
+        carService,
+        SocketIORechargeEventObserver(Socket.server)
     )
 
     suspend fun startRecharge(call: ApplicationCall) = call.handleRechargeRequest { chargingStationId ->
@@ -33,11 +35,7 @@ object RechargeController {
             rechargeService.startRecharge(
                 call.getUserId(),
                 request.toInput(),
-                StartRechargeLogicDTO(
-                    chargingStation.power,
-                    car.maxBattery,
-                    car.currentBattery ?: Random.nextInt(100),
-                ).toInput(),
+                StartRechargeLogicDTO(chargingStation.power, car.maxBattery, Random.nextInt(100)).toInput(),
                 chargingStationId
             )
         )
