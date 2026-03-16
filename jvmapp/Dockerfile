@@ -17,5 +17,6 @@ WORKDIR ${WORKINGDIR}
 COPY --from=build /root/build/libs/*.jar ${WORKINGDIR}/
 
 EXPOSE 3000
+EXPOSE 3001
 
 ENTRYPOINT ["java", "-jar","jvmapp.jar"]

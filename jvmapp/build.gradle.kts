@@ -23,6 +23,7 @@ repositories {
 }
 
 dependencies {
+    implementation(libs.netty.socketio)
     implementation(libs.bundles.ktor.server)
     implementation(libs.bundles.ktor.client)
     implementation(libs.bundles.mongodb)
