@@ -19,10 +19,10 @@ object Socket {
         server = SocketIOServer(config)
         server.run {
             addConnectListener { println("Client connected: ${it.sessionId}") }
-            addEventListener("join-charging-stations", Collection::class.java) { client, chargingStationIds, _ ->
+            addEventListener("join-charging-stations", Array<String>::class.java) { client, chargingStationIds, _ ->
                 chargingStationIds.forEach { client.joinRoom("chargingStation:$it") }
             }
-            addEventListener("leave-charging-stations", Collection::class.java) { client, chargingStationIds, _ ->
+            addEventListener("leave-charging-stations", Array<String>::class.java) { client, chargingStationIds, _ ->
                 chargingStationIds.forEach { client.leaveRoom("chargingStation:$it") }
             }
             addEventListener("start-recharge", String::class.java) { client, carId, _ ->
