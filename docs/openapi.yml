@@ -386,6 +386,64 @@ paths:
         '404':
           description: charging station not found
 
+  /charging-stations/{id}/start-recharge:
+    post:
+      tags:
+        - charging-station
+      description: Start recharging a car at a charging station
+      operationId: startRecharge
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: car data
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                carId:
+                  type: string
+      responses:
+        '200':
+          description: recharge started successfully
+        '400':
+          description: charging station not available
+        '404':
+          description: charging station or car not found
+
+  /charging-stations/{id}/stop-recharge:
+    post:
+      tags:
+        - charging-station
+      description: Stop recharging a car at a charging station
+      operationId: stopRecharge
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: car data
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                carId:
+                  type: string
+      responses:
+        '200':
+          description: recharge stopped successfully
+        '404':
+          description: charging station not found
+
 components:
   schemas:
     User:

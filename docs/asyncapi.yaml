@@ -1,0 +1,120 @@
+asyncapi: 3.0.0
+info:
+  title: "ChargeAndTrack"
+  description: "ChargeAndTrack"
+  version: 1.0.0
+channels:
+  socket-io:
+    description: Socket.IO channel
+    messages:
+      join-charging-stations:
+        $ref: '#/components/messages/join-charging-stations'
+      leave-charging-stations:
+        $ref: '#/components/messages/leave-charging-stations'
+      start-recharge:
+        $ref: '#/components/messages/start-recharge'
+      stop-recharge:
+        $ref: '#/components/messages/stop-recharge'
+      recharge-update:
+        $ref: '#/components/messages/recharge-update'
+      recharge-completed:
+        $ref: '#/components/messages/recharge-completed'
+      charging-station-update:
+        $ref: '#/components/messages/charging-station-update'
+
+operations:
+  recharge-update:
+    action: send
+    channel:
+      $ref: '#/channels/socket-io'
+    messages:
+      - $ref: '#/channels/socket-io/messages/recharge-update'
+  recharge-completed:
+    action: send
+    channel:
+      $ref: '#/channels/socket-io'
+    messages:
+      - $ref: '#/channels/socket-io/messages/recharge-completed'
+  charging-station-update:
+    action: send
+    channel:
+      $ref: '#/channels/socket-io'
+    messages:
+      - $ref: '#/channels/socket-io/messages/charging-station-update'
+  join-charging-stations:
+    action: receive
+    channel:
+      $ref: '#/channels/socket-io'
+    messages:
+      - $ref: '#/channels/socket-io/messages/join-charging-stations'
+  leave-charging-stations:
+    action: receive
+    channel:
+      $ref: '#/channels/socket-io'
+    messages:
+      - $ref: '#/channels/socket-io/messages/leave-charging-stations'
+  start-recharge:
+    action: receive
+    channel:
+      $ref: '#/channels/socket-io'
+    messages:
+      - $ref: '#/channels/socket-io/messages/start-recharge'
+  stop-recharge:
+    action: receive
+    channel:
+      $ref: '#/channels/socket-io'
+    messages:
+      - $ref: '#/channels/socket-io/messages/stop-recharge'
+
+components:
+  messages:
+    recharge-update:
+      payload:
+        type: object
+        properties:
+          id:
+            type: string
+            description: The ID of the car in charge updated
+          level:
+            type: number
+            description: The current level of the recharge (e.g. 50 for 50%)
+    recharge-completed:
+      payload:
+        type: object
+        properties:
+          id:
+            type: string
+            description: The ID of the car that completed the recharge
+    charging-station-update:
+      payload:
+        type: object
+        properties:
+          id:
+            type: string
+            description: The ID of the charging station updated
+    join-charging-stations:
+      payload:
+        type: array
+        items:
+          type: string
+          description: The ID of the charging station to join
+    leave-charging-stations:
+      payload:
+        type: array
+        items:
+          type: string
+          description: The ID of the charging station to leave
+    start-recharge:
+      payload:
+        type: object
+        properties:
+          carId:
+            type: string
+            description: The ID of the car to start recharge
+    stop-recharge:
+      payload:
+        type: object
+        properties:
+          carId:
+            type: string
+            description: The ID of the car to stop recharge
