@@ -1,3 +1,49 @@
+## [0.7.0](https://github.com/ChargeAndTrack/backend-spe/compare/0.6.0...0.7.0) (2026-03-17)
+
+### ⚠ BREAKING CHANGES
+
+* **recharge:** add start and stop recharge in openapi; add asyncapi
+
+### Features
+
+* add currentChargingStationId in CarDTO and currentCarBattery in StartRechargeLogicDTO; update car battery when starting a recharge; fix conversion in PERCENT_CHANGE ([5b884bb](https://github.com/ChargeAndTrack/backend-spe/commit/5b884bb24496234c2727e8c513652a88c3bd98d6))
+* **charging-stations:** charging station power must be between 1 and 100 to be valid instead of greater than 0; add default null values to nullable properties of input data classes ([88da5c5](https://github.com/ChargeAndTrack/backend-spe/commit/88da5c5c9121b16177539a493c4951906ccdca85))
+* install CORS plugin in Server ([745fbff](https://github.com/ChargeAndTrack/backend-spe/commit/745fbfff6e4500366515c977e51be2ab92e885af))
+* **mongodb:** add recharges collection ([adeaa67](https://github.com/ChargeAndTrack/backend-spe/commit/adeaa670e8f44fa0d6e4d792a2197a42e3d4f16e))
+* **recharge:** add ChargingStationRechargingDTO and its conversion from ChargingStation; change getChargingStation to respond with the right DTO based on a parameter ([76cde80](https://github.com/ChargeAndTrack/backend-spe/commit/76cde8030d32aa81110eb585cf4c41e3a3bc68e7))
+* **recharge:** add increment car battery methods and IncrementCarBatteryInput data class ([11c0aa0](https://github.com/ChargeAndTrack/backend-spe/commit/11c0aa0fafa91e9913eba15c49e95b1729d0437e))
+* **recharge:** add methods to Recharge interface and their implementation; add RechargeEvent interface so RechargeCompleted and RechargeUpdate domain events; add StartRechargeLogicInput data class; add RechargeObserver interface ([516553d](https://github.com/ChargeAndTrack/backend-spe/commit/516553d65c699e58c9ad7233f87f4b4b01c7e5ad))
+* **recharge:** add RechargeRepository, RechargeService interfaces and the service implementation ([c8c0be7](https://github.com/ChargeAndTrack/backend-spe/commit/c8c0be717ea8e7a6d1d0387007dec85c3fd58685))
+* **recharge:** add socketio server, RechargeEventObserver and its socketio implementation, EventType enum and SocketIOEvent sealed class ([542c6bb](https://github.com/ChargeAndTrack/backend-spe/commit/542c6bbf127822f49c53ca02cc2062ab7ee80b48))
+* **recharge:** add start and stop recharge routes; add recharge DTOs and RechargeDbEntity data classes; add MongoDbRechargeRepository and RechargeController ([bdbc1cd](https://github.com/ChargeAndTrack/backend-spe/commit/bdbc1cdcb836b618e0dba63579f472250c3895ee))
+* **recharge:** add StartRechargeLogicDTO; change start and stop recharge methods using a mutable map of active recharges and implement notifyRechargeEvent method because now RechargeService is a RechargeObserver ([f114e9b](https://github.com/ChargeAndTrack/backend-spe/commit/f114e9b113483ac0c74336f8840582689130d6c5))
+* **recharge:** replace Car and ChargingStation references with their ids in Recharge; add RechargeInputs data classes ([da3df32](https://github.com/ChargeAndTrack/backend-spe/commit/da3df3229fc5a39f2f717f2a3967dbdd68d34882))
+
+### Bug Fixes
+
+* **recharge:** charging station power required greater than 0 in charging station DTOs and StartRechargeLogicDTO; replace withContext with CoroutineScope in RechargeImpl start method; throw NotFoundException in RechargeServiceImpl stopRecharge method if recharge not present; change the expected charging station in recharge as not available ([6ebaac7](https://github.com/ChargeAndTrack/backend-spe/commit/6ebaac74c09717303e586156a2e7fbd2d34fa6e8))
+* **recharge:** fix currentBattery update and job's stop when recharge complete in RechargeImpl; update charging station availability when starting a recharge and add RechargeEventObserver property to RechargeServiceImpl; refactor controllers into classes ([7c96162](https://github.com/ChargeAndTrack/backend-spe/commit/7c961626eece9b5a06976e3de39417ef5f06f5b7))
+
+### Documentation
+
+* **recharge:** add start and stop recharge in openapi; add asyncapi ([3e10b9a](https://github.com/ChargeAndTrack/backend-spe/commit/3e10b9a6c5301e7bddf9e8f56159d61fb5559a32))
+* **recharge:** replace Car and ChargingStation references with their ids in Recharge in domainDiagram ([b9bb7ed](https://github.com/ChargeAndTrack/backend-spe/commit/b9bb7edde62a848e7fbe82ab69c0ccef45e1d953))
+
+### Tests
+
+* **charging-stations:** adjust get charging station tests based on getChargingStation change ([5f1d8ba](https://github.com/ChargeAndTrack/backend-spe/commit/5f1d8bafba80a1fee330648373b1aeeed2f671a3))
+* **recharge:** add RechargeTest ([8f2f639](https://github.com/ChargeAndTrack/backend-spe/commit/8f2f639c9a45ae2c1c43b6ce91f1fc33aca9c837))
+
+### Build and continuous integration
+
+* add ktor server cors dependency ([da1ca10](https://github.com/ChargeAndTrack/backend-spe/commit/da1ca105f8ad95fff36885544d461ea9ad0b5dec))
+* add netty socketio dependency and expose port 3001 from jvmapp service ([07553f1](https://github.com/ChargeAndTrack/backend-spe/commit/07553f1c2c36a82d1393e7eec9f5a60e1aff675a))
+
+### Refactoring
+
+* **recharge:** move validateRecharge extension function to RechargeDTO file and its call to RechargeController ([a4afac3](https://github.com/ChargeAndTrack/backend-spe/commit/a4afac3a9644b521a333afb39f2bee82a97ac089))
+* **recharge:** replace Collection with Array as event class ([51a3cb2](https://github.com/ChargeAndTrack/backend-spe/commit/51a3cb2752d413d5e33d099b261d86b652fbc6f7))
+
 ## [0.6.0](https://github.com/ChargeAndTrack/backend-spe/compare/0.5.1...0.6.0) (2026-03-08)
 
 ### Features
