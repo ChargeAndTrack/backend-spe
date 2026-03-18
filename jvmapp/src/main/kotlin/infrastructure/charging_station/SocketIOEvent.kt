@@ -7,7 +7,7 @@ sealed interface Event {
 
 enum class EventType(val event: String) {
     RECHARGE_UPDATE("recharge-update"),
-    CHARGING_STATION_UPDATE("charging-station-update"),
+    CHARGING_STATION_UPDATED("charging-station-updated"),
     RECHARGE_COMPLETED("recharge-completed")
 }
 
@@ -21,10 +21,10 @@ sealed class SocketIOEvent(val eventType: EventType, val data: Map<String, Any> 
         override val room: String
     ) : SocketIOEvent(EventType.RECHARGE_UPDATE, mapOf("id" to carId, "level" to level))
 
-    data class ChargingStationUpdateEvent(
+    data class ChargingStationUpdatedEvent(
         val chargingStationId: String,
         override val room: String
-    ) : SocketIOEvent(EventType.CHARGING_STATION_UPDATE, mapOf("id" to chargingStationId))
+    ) : SocketIOEvent(EventType.CHARGING_STATION_UPDATED, mapOf("id" to chargingStationId))
 
     data class RechargeCompletedEvent(
         val id: String,

@@ -16,6 +16,7 @@ data class RechargeImpl(override val carId: String, override val chargingStation
 
     private val rechargeObservers = mutableListOf<RechargeObserver>()
     private lateinit var rechargeJob: Job
+    private lateinit var userId: String
     private var currentBattery = 0
 
     override fun addRechargeObserver(observer: RechargeObserver) { rechargeObservers.add(observer) }
@@ -23,8 +24,10 @@ data class RechargeImpl(override val carId: String, override val chargingStation
     override fun removeRechargeObserver(observer: RechargeObserver) { rechargeObservers.remove(observer) }
 
     override suspend fun start(userId: String, startRechargeLogicInput: StartRechargeLogicInput) {
+        this.userId = userId
         currentBattery = startRechargeLogicInput.currentCarBattery
         rechargeJob = CoroutineScope(Dispatchers.Default).launch {
+            ChargingStationUpdated(userId, this@RechargeImpl, available = false).notify()
             while (true) {
                 delay(timeToRechargeOnePercent(startRechargeLogicInput))
                 if (currentBattery + RECHARGE_PERCENTAGE < LIMIT_BATTERY_PERCENTAGE) {
@@ -38,7 +41,12 @@ data class RechargeImpl(override val carId: String, override val chargingStation
         }
     }
 
-    override suspend fun stop() { if (this::rechargeJob.isInitialized && rechargeJob.isActive) rechargeJob.cancel() }
+    override suspend fun stop() {
+        if (this::rechargeJob.isInitialized && rechargeJob.isActive) {
+            ChargingStationUpdated(userId, this, available = true).notify()
+            rechargeJob.cancel()
+        }
+    }
 
     private suspend fun RechargeEvent.notify() = rechargeObservers.forEach { it.notifyRechargeEvent(this) }
 

@@ -2,6 +2,7 @@ package application.charging_station
 
 import application.user.CarService
 import domain.NotFoundException
+import domain.charging_station.ChargingStationUpdated
 import domain.charging_station.Recharge
 import domain.charging_station.RechargeCompleted
 import domain.charging_station.RechargeEvent
@@ -45,7 +46,6 @@ class RechargeServiceImpl(
             startRechargeInput.carId,
             UpdateCarInput(currentBattery = startRechargeLogicInput.currentCarBattery)
         )
-        chargingStationService.updateChargingStation(chargingStationId, UpdateChargingStationInput(available = false))
         it.addRechargeObserver(this)
         it.start(userId, startRechargeLogicInput)
         recharges[Pair(startRechargeInput.carId, chargingStationId)] = it
@@ -71,6 +71,14 @@ class RechargeServiceImpl(
                     ?: throw IllegalStateException("Car battery cannot be null")
             )
         }
+        is ChargingStationUpdated -> {
+            println("Charging station updated")
+            chargingStationService.updateChargingStation(
+                rechargeEvent.recharge.chargingStationId,
+                UpdateChargingStationInput(available = rechargeEvent.available)
+            )
+            rechargeEventObserver.chargingStationUpdated(rechargeEvent.recharge)
+        }
         is RechargeCompleted -> {
             println("Recharge completed")
             rechargeEvent.recharge.stopHandler()
@@ -81,10 +89,6 @@ class RechargeServiceImpl(
 
     private suspend fun Recharge.stopHandler() {
         rechargeRepository.stopRecharge(this)
-        chargingStationService.updateChargingStation(
-            chargingStationId,
-            UpdateChargingStationInput(available = true)
-        )
         recharges.remove(Pair(carId, chargingStationId))
     }
 }
