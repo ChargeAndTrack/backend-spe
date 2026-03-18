@@ -8,6 +8,7 @@ import Setup.loginAndGetToken
 import infrastructure.Router.assemblePath
 import infrastructure.charging_station.AddChargingStationDTO
 import infrastructure.charging_station.ChargingStationDTO
+import infrastructure.charging_station.ChargingStationRechargingDTO
 import infrastructure.charging_station.LocationDTO
 import infrastructure.charging_station.UpdateChargingStationDTO
 import io.kotest.core.spec.style.FunSpec
@@ -43,10 +44,10 @@ class ChargingStationTest : FunSpec() {
         beforeEach { deleteAllChargingStations() }
 
         test("it should list all charging stations successfully") {
-            val chargingStations = insertChargingStations()
+            val chargingStations: Collection<ChargingStationRechargingDTO> = insertChargingStations()
             val response = client.get(chargingStationPath()) { buildRequest<Unit>(token) }
             response.status shouldBeEqual HttpStatusCode.OK
-            response.body<Collection<ChargingStationDTO>>() shouldContainExactly chargingStations
+            response.body<Collection<ChargingStationRechargingDTO>>() shouldContainExactly chargingStations
         }
 
         context("add charging station tests") {
@@ -144,7 +145,7 @@ class ChargingStationTest : FunSpec() {
         }
 
         context("get charging stations by position tests") {
-            lateinit var chargingStations: Collection<ChargingStationDTO>
+            lateinit var chargingStations: Collection<ChargingStationRechargingDTO>
 
             beforeEach { chargingStations = insertChargingStations() }
 
@@ -157,7 +158,7 @@ class ChargingStationTest : FunSpec() {
                     ))
                 }
                 response.status shouldBeEqual HttpStatusCode.OK
-                response.body<Collection<ChargingStationDTO>>() shouldContainExactly chargingStations
+                response.body<Collection<ChargingStationRechargingDTO>>() shouldContainExactly chargingStations
             }
 
             test("it should fail to get the near charging stations and the closest one when invalid coordinates are passed") {
@@ -208,9 +209,9 @@ class ChargingStationTest : FunSpec() {
                     )
                 }
                 response1.status shouldBeEqual HttpStatusCode.OK
-                response1.body<ChargingStationDTO>() shouldBeEqual chargingStations.first()
+                response1.body<ChargingStationRechargingDTO>() shouldBeEqual chargingStations.first()
                 response2.status shouldBeEqual HttpStatusCode.OK
-                response2.body<ChargingStationDTO>() shouldBeEqual chargingStations.elementAt(1)
+                response2.body<ChargingStationRechargingDTO>() shouldBeEqual chargingStations.elementAt(1)
             }
         }
     }
@@ -230,8 +231,8 @@ class ChargingStationTest : FunSpec() {
             buildRequest(token, chargingStationToAdd)
         }
 
-    private suspend fun insertChargingStations(): Collection<ChargingStationDTO> = listOf(
+    private suspend inline fun <reified T> insertChargingStations(): Collection<T> = listOf(
         insertChargingStation(chargingStation1),
         insertChargingStation(chargingStation2)
-    ).map { it.body<ChargingStationDTO>() }.toList()
+    ).map { it.body<T>() }.toList()
 }

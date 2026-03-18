@@ -20,10 +20,18 @@ data class UserDTO(
 @Serializable
 data class CarDTO(
     val _id: String,
-    var plate: String,
-    var maxBattery: Int,
-    var currentBattery: Int?,
-    var currentChargingStationId: String?
+    val plate: String,
+    val maxBattery: Int,
+    val currentBattery: Int?
+)
+
+@Serializable
+data class CarRechargingDTO(
+    val _id: String,
+    val plate: String,
+    val maxBattery: Int,
+    val currentBattery: Int?,
+    val currentChargingStationId: String?
 )
 
 @Serializable
@@ -57,9 +65,16 @@ fun User.toDTO(): UserDTO =
         cars = cars.toDTO()
     )
 
-fun Collection<Car>.toDTO() = map { it.toDTO() }
+fun Collection<Car>.toDTO(): Collection<CarDTO> = map { it.toDTO() }
 
-fun Car.toDTO(currentChargingStationId: String? = null): CarDTO = CarDTO(
+fun Car.toDTO(): CarDTO = CarDTO(
+    _id = id,
+    plate = plate,
+    maxBattery = maxBattery,
+    currentBattery = currentBattery
+)
+
+fun Car.toDTO(currentChargingStationId: String? = null): CarRechargingDTO = CarRechargingDTO(
     _id = id,
     plate = plate,
     maxBattery = maxBattery,

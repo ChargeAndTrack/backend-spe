@@ -7,6 +7,7 @@ import Setup.loginAndGetToken
 import Setup.userLoginDTO
 import infrastructure.user.AddCarDTO
 import infrastructure.user.CarDTO
+import infrastructure.user.CarRechargingDTO
 import infrastructure.user.UpdateCarDTO
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
@@ -46,7 +47,7 @@ class CarsTest : FunSpec() {
             insertCars()
             val response = client.get(CARS_URL) { buildRequest<Unit>(token) }
             response.status shouldBe HttpStatusCode.OK
-            val cars: Collection<CarDTO> = response.body()
+            val cars: Collection<CarRechargingDTO> = response.body()
             cars.size shouldBe 3
         }
 
@@ -80,9 +81,10 @@ class CarsTest : FunSpec() {
                 val insertedCar: CarDTO = insertCar(addCar1Body).body()
                 val getResponse = client.get(carUrl(insertedCar._id)) { buildRequest<Unit>(token) }
                 getResponse.status shouldBe HttpStatusCode.OK
-                val car: CarDTO = getResponse.body()
+                val car: CarRechargingDTO = getResponse.body()
                 car.plate shouldBe addCar1Body.plate
                 car.maxBattery shouldBe addCar1Body.maxBattery
+                car.currentChargingStationId shouldBe null
             }
 
             test("it should fail to get the requested non-existent car") {

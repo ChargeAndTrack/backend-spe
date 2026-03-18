@@ -17,7 +17,7 @@ class CarController(private val rechargeController: RechargeController) {
 
     suspend fun getCars(call: ApplicationCall) {
         println("getCars")
-        call.respond(HttpStatusCode.OK, carService.getCars(getUserId(call)).toDTO())
+        call.respond(HttpStatusCode.OK, carService.getCars(getUserId(call)).toRechargingDTO())
     }
 
     suspend fun addCar(call: ApplicationCall) {
@@ -46,7 +46,7 @@ class CarController(private val rechargeController: RechargeController) {
         call.respond(HttpStatusCode.OK, carService.deleteCar(getUserId(call), carId).toDTO())
     }
 
-    private suspend fun Collection<Car>.toDTO() = map {
+    private suspend fun Collection<Car>.toRechargingDTO(): Collection<CarRechargingDTO> = map {
         it.toDTO(rechargeController.rechargeService.getChargingStationIdByCarId(it.id))
     }
 

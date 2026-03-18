@@ -26,7 +26,7 @@ class ChargingStationsController {
         call.respond(
             HttpStatusCode.OK,
             chargingStationService.listChargingStations()
-                .map { it.toDTO() }
+                .map { it.toDTO(rechargeService.getCarIdByChargingStationId(it.id)) }
                 .toList()
         )
     }
@@ -45,9 +45,6 @@ class ChargingStationsController {
 
     suspend fun getChargingStation(call: ApplicationCall) = call.handleChargingStationRequest { chargingStationId ->
         println("Get charging station by id")
-        call.parameters["without-car-in-charge"]?.let {
-            call.respond(HttpStatusCode.OK, chargingStationService.getChargingStation(chargingStationId).toDTO())
-        }
         call.respond(
             HttpStatusCode.OK,
             chargingStationService.getChargingStation(chargingStationId).toDTO(
@@ -83,20 +80,20 @@ class ChargingStationsController {
                 call.request.queryParameters.toNearbyChargingStationDTO()
                     .also { it.validate() }
                     .toInput()
-            ).map { it.toDTO() }
+            ).map { it.toDTO(rechargeService.getCarIdByChargingStationId(it.id)) }
             .toList()
         )
     }
 
     suspend fun getClosestChargingStation(call: ApplicationCall) {
-        print("Get nearby charging stations")
+        println("Get closest charging stations")
         call.respond(
             HttpStatusCode.OK,
             chargingStationService.getClosestChargingStation(
                  call.request.queryParameters.toClosestChargingStationDTO()
                     .also { it.validate() }
                     .toInput()
-            ).toDTO()
+            ).let { it.toDTO(rechargeService.getCarIdByChargingStationId(it.id)) }
         )
     }
 
