@@ -38,6 +38,7 @@ class Server(routing: Application.() -> Unit) {
                 prettyPrint = true
                 isLenient = true
                 ignoreUnknownKeys = true
+                encodeDefaults = true
             })
         }
         install(CORS) {
