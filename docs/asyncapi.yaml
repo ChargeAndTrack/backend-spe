@@ -19,8 +19,8 @@ channels:
         $ref: '#/components/messages/recharge-update'
       recharge-completed:
         $ref: '#/components/messages/recharge-completed'
-      charging-station-update:
-        $ref: '#/components/messages/charging-station-update'
+      charging-station-updated:
+        $ref: '#/components/messages/charging-station-updated'
 
 operations:
   recharge-update:
@@ -35,12 +35,12 @@ operations:
       $ref: '#/channels/socket-io'
     messages:
       - $ref: '#/channels/socket-io/messages/recharge-completed'
-  charging-station-update:
+  charging-station-updated:
     action: send
     channel:
       $ref: '#/channels/socket-io'
     messages:
-      - $ref: '#/channels/socket-io/messages/charging-station-update'
+      - $ref: '#/channels/socket-io/messages/charging-station-updated'
   join-charging-stations:
     action: receive
     channel:
@@ -85,7 +85,7 @@ components:
           id:
             type: string
             description: The ID of the car that completed the recharge
-    charging-station-update:
+    charging-station-updated:
       payload:
         type: object
         properties:

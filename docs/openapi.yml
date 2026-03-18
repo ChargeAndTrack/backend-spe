@@ -80,7 +80,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Car'
+                  $ref: '#/components/schemas/CarRecharging'
         '404':
           description: user not found
     post:
@@ -128,7 +128,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Car'
+                $ref: '#/components/schemas/CarRecharging'
         '404':
           description: car not found
     put:
@@ -205,7 +205,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ChargingStation'
+                  $ref: '#/components/schemas/ChargingStationRecharging'
     post:
       tags:
         - charging-station
@@ -272,7 +272,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ChargingStation'
+                  $ref: '#/components/schemas/ChargingStationRecharging'
 
   /charging-stations/closest:
     get:
@@ -304,7 +304,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ChargingStation'
+                $ref: '#/components/schemas/ChargingStationRecharging'
         '404':
           description: no charging stations found
 
@@ -472,6 +472,20 @@ components:
           type: number
         currentBattery:
           type: number
+    CarRecharging:
+      type: object
+      properties:
+        _id:
+          type: string
+        plate:
+          type: string
+        maxBattery:
+          type: number
+        currentBattery:
+          type: number
+        currentChargingStationId:
+          type: string
+          nullable: true
     ChargingStation:
       type: object
       properties:
@@ -485,6 +499,23 @@ components:
           type: boolean
         location:
           $ref: '#/components/schemas/Location'
+    ChargingStationRecharging:
+      type: object
+      properties:
+        _id:
+          type: string
+        power:
+          type: number
+        available:
+          type: boolean
+        enabled:
+          type: boolean
+        location:
+          $ref: '#/components/schemas/Location'
+        currentCarId:
+          type: string
+          nullable: true
+
     Location:
       type: object
       properties:
