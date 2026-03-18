@@ -1,3 +1,22 @@
+## [1.0.0](https://github.com/ChargeAndTrack/backend-spe/compare/0.7.0...1.0.0) (2026-03-18)
+
+### ⚠ BREAKING CHANGES
+
+* **recharge:** add ChargingStationUpdated domain event and its usage, rename ChargingStationUpdateEvent to ChargingStationUpdatedEvent
+
+### Features
+
+* add CarRechargingDTO; getChargingStation, listChargingStations, getNearbyChargingStations and getClosestChargingStations respond with ChargingStationRechargingDTO; adjust tests ([eef4b1f](https://github.com/ChargeAndTrack/backend-spe/commit/eef4b1f9b94371bca14ed8c315ed56b55d8ae622))
+* **recharge:** add ChargingStationUpdated domain event and its usage, rename ChargingStationUpdateEvent to ChargingStationUpdatedEvent ([5702664](https://github.com/ChargeAndTrack/backend-spe/commit/570266483eab879e833da714efcb8918801a3152))
+
+### Bug Fixes
+
+* **server:** set encodeDefaults as true in ContentNegotiation JSON options ([4fd1a4a](https://github.com/ChargeAndTrack/backend-spe/commit/4fd1a4a491f6c4857ed439ed3de9bbaf74a1e66e))
+
+### Documentation
+
+* add CarRecharging and ChargingStationRecharging components schemas in openapi, rename charging-station-update to charging-station-updated in asyncapi ([f7f5236](https://github.com/ChargeAndTrack/backend-spe/commit/f7f5236b34f6acabcb1e575c30c01e7feabbd919))
+
 ## [0.7.0](https://github.com/ChargeAndTrack/backend-spe/compare/0.6.0...0.7.0) (2026-03-17)
 
 ### ⚠ BREAKING CHANGES
