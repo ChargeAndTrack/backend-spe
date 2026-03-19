@@ -19,14 +19,13 @@ class RechargeServiceImpl(
     val rechargeRepository: RechargeRepository,
     val chargingStationService: ChargingStationService,
     val carService: CarService,
-    val rechargeEventObserver: RechargeEventObserver
+    val rechargeEventObserver: RechargeEventObserver,
+    val activeRechargeRepository: ActiveRechargeRepository
 ) : RechargeService {
 
     private companion object {
         const val RECHARGE_NOT_FOUND_MESSAGE = "Recharge not found"
     }
-
-    private val recharges = mutableMapOf<Pair<String, String>, Recharge>()
 
     override suspend fun getChargingStationIdByCarId(carId: String): String? =
         rechargeRepository.getChargingStationIdByCarId(carId)
@@ -48,11 +47,11 @@ class RechargeServiceImpl(
         )
         it.addRechargeObserver(this)
         it.start(userId, startRechargeLogicInput)
-        recharges[Pair(startRechargeInput.carId, chargingStationId)] = it
+        activeRechargeRepository.addRecharge(it)
     }
 
     override suspend fun stopRecharge(stopRechargeInput: StopRechargeInput, chargingStationId: String) =
-        recharges[Pair(stopRechargeInput.carId, chargingStationId)]?.let {
+        activeRechargeRepository.getRechargeByIds(stopRechargeInput.carId, chargingStationId)?.let {
             it.stopHandler()
             it.stop()
         } ?: throw NotFoundException(RECHARGE_NOT_FOUND_MESSAGE)
@@ -89,6 +88,6 @@ class RechargeServiceImpl(
 
     private suspend fun Recharge.stopHandler() {
         rechargeRepository.stopRecharge(this)
-        recharges.remove(Pair(carId, chargingStationId))
+        activeRechargeRepository.removeRecharge(carId, chargingStationId)
     }
 }

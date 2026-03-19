@@ -1,5 +1,6 @@
 package infrastructure.charging_station
 
+import application.charging_station.ActiveRechargeRepositoryImpl
 import application.charging_station.ChargingStationService
 import application.charging_station.RechargeServiceImpl
 import application.user.CarServiceImpl
@@ -17,7 +18,8 @@ class ChargingStationsController(val chargingStationService: ChargingStationServ
         MongoDbRechargeRepository(),
         chargingStationService,
         CarServiceImpl(MongoDbUserRepository()),
-        SocketIORechargeEventObserver(Socket.server)
+        SocketIORechargeEventObserver(Socket.server),
+        ActiveRechargeRepositoryImpl()
     )
 
     suspend fun listChargingStations(call: ApplicationCall) {

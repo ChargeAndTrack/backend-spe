@@ -1,5 +1,6 @@
 package infrastructure.charging_station
 
+import application.charging_station.ActiveRechargeRepositoryImpl
 import application.charging_station.ChargingStationServiceImpl
 import application.charging_station.RechargeServiceImpl
 import application.user.CarServiceImpl
@@ -21,7 +22,8 @@ class RechargeController {
         MongoDbRechargeRepository(),
         chargingStationService,
         carService,
-        SocketIORechargeEventObserver(Socket.server)
+        SocketIORechargeEventObserver(Socket.server),
+        ActiveRechargeRepositoryImpl()
     )
 
     suspend fun startRecharge(call: ApplicationCall) = call.handleRechargeRequest { chargingStationId ->
