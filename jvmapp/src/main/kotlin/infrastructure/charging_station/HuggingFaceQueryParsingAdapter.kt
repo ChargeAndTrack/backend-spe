@@ -2,6 +2,7 @@ package infrastructure.charging_station
 
 import application.charging_station.ChargingStationSearchQuery
 import application.charging_station.QueryParsingPort
+import common.Adapter
 import domain.InternalErrorException
 import infrastructure.AbstractExternalServiceAdapter
 import infrastructure.Config
@@ -11,6 +12,7 @@ import io.ktor.http.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
+@Adapter
 class HuggingFaceQueryParsingAdapter : AbstractExternalServiceAdapter(), QueryParsingPort {
 
     private companion object {

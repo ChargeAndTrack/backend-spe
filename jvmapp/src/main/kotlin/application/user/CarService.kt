@@ -1,10 +1,12 @@
 package application.user
 
+import common.InBoundPort
 import domain.user.AddCarInput
 import domain.user.Car
 import domain.user.IncrementCarBatteryInput
 import domain.user.UpdateCarInput
 
+@InBoundPort
 interface CarService {
     suspend fun getCars(userId: String): Collection<Car>
     suspend fun addCar(userId: String, addCarInput: AddCarInput): Car

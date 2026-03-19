@@ -1,5 +1,6 @@
 package infrastructure
 
+import common.Adapter
 import domain.InternalErrorException
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
@@ -10,6 +11,7 @@ import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
+@Adapter
 abstract class AbstractExternalServiceAdapter {
     protected companion object {
         const val EXTERNAL_SERVICE_ERROR_MESSAGE = "Can't contact external service"

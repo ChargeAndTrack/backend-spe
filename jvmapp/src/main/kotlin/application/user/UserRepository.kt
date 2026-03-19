@@ -1,8 +1,10 @@
 package application.user
 
+import common.OutBoundPort
 import domain.user.Car
 import domain.user.User
 
+@OutBoundPort
 interface UserRepository {
     fun getNewId(): String
     suspend fun findUser(username: String, password: String): User

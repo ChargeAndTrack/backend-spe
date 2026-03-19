@@ -8,6 +8,7 @@ import com.mongodb.client.model.ReturnDocument
 import com.mongodb.client.model.geojson.Point
 import com.mongodb.client.model.geojson.Position
 import com.mongodb.client.result.InsertOneResult
+import common.Adapter
 import domain.InternalErrorException
 import domain.NotFoundException
 import domain.charging_station.ChargingStation
@@ -22,6 +23,7 @@ import kotlinx.coroutines.flow.toList
 import org.bson.conversions.Bson
 import org.bson.types.ObjectId
 
+@Adapter
 class MongoDbChargingStationRepository : ChargingStationRepository {
 
     private companion object {

@@ -1,6 +1,7 @@
 package infrastructure.charging_station
 
 import application.charging_station.GeocodingPort
+import common.Adapter
 import domain.InternalErrorException
 import domain.InvalidInputException
 import domain.NotFoundException
@@ -14,6 +15,7 @@ import io.ktor.client.request.*
 import io.ktor.http.HttpHeaders
 import kotlinx.serialization.Serializable
 
+@Adapter
 class NominatimGeocodingAdapter : AbstractExternalServiceAdapter(), GeocodingPort {
 
     private companion object {

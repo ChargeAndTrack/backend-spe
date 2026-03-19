@@ -1,9 +1,11 @@
 package application.charging_station
 
+import common.OutBoundPort
 import domain.charging_station.ChargingStation
 import domain.charging_station.ClosestChargingStationInput
 import domain.charging_station.NearbyChargingStationsInput
 
+@OutBoundPort
 interface ChargingStationRepository {
     fun getNewId(): String
 

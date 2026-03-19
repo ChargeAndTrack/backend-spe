@@ -2,8 +2,10 @@ package infrastructure.charging_station
 
 import application.charging_station.RechargeEventObserver
 import com.corundumstudio.socketio.SocketIOServer
+import common.Adapter
 import domain.charging_station.Recharge
 
+@Adapter
 class SocketIORechargeEventObserver(val socketServer: SocketIOServer) : RechargeEventObserver {
 
     override suspend fun rechargeUpdate(recharge: Recharge, level: Int) =

@@ -3,6 +3,7 @@ package infrastructure.charging_station
 import application.charging_station.RechargeRepository
 import com.mongodb.MongoException
 import com.mongodb.client.model.Filters.*
+import common.Adapter
 import domain.InternalErrorException
 import domain.InvalidInputException
 import domain.NotFoundException
@@ -10,6 +11,7 @@ import domain.charging_station.Recharge
 import infrastructure.MongoDb
 import kotlinx.coroutines.flow.firstOrNull
 
+@Adapter
 class MongoDbRechargeRepository : RechargeRepository {
 
     private companion object {

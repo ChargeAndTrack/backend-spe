@@ -1,7 +1,9 @@
 package application.charging_station
 
+import common.OutBoundPort
 import domain.charging_station.Recharge
 
+@OutBoundPort
 interface RechargeRepository {
     suspend fun getChargingStationIdByCarId(carId: String): String?
 

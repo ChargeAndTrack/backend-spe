@@ -1,11 +1,13 @@
 package application.charging_station
 
+import common.InBoundPort
 import domain.charging_station.AddChargingStationInput
 import domain.charging_station.ChargingStation
 import domain.charging_station.ClosestChargingStationInput
 import domain.charging_station.NearbyChargingStationsInput
 import domain.charging_station.UpdateChargingStationInput
 
+@InBoundPort
 interface ChargingStationService {
     suspend fun listChargingStations(): Collection<ChargingStation>
 

@@ -4,6 +4,7 @@ import application.user.UserRepository
 import com.mongodb.MongoException
 import com.mongodb.client.model.Filters.*
 import com.mongodb.client.model.Updates.*
+import common.Adapter
 import domain.InternalErrorException
 import domain.NotFoundException
 import domain.user.Car
@@ -12,6 +13,7 @@ import infrastructure.MongoDb
 import kotlinx.coroutines.flow.firstOrNull
 import org.bson.types.ObjectId
 
+@Adapter
 class MongoDbUserRepository : UserRepository {
 
     private companion object {
