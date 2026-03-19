@@ -1,3 +1,40 @@
+## [2.0.0](https://github.com/ChargeAndTrack/backend-spe/compare/1.0.0...2.0.0) (2026-03-19)
+
+### ⚠ BREAKING CHANGES
+
+* **llm:** add validation in MinPowerKwFilter
+
+### Features
+
+* **charging-stations:** add radius in getNearbyChargingStations method ([748ee4b](https://github.com/ChargeAndTrack/backend-spe/commit/748ee4b25d8af1b6a939841e2a5a625f1165940b))
+* **llm:** add /llm/search route and basic search functionality ([ff8f250](https://github.com/ChargeAndTrack/backend-spe/commit/ff8f2508e3b3294c0f08818511b30d9d847d32ee))
+* **llm:** add ChargingStationFilter interface and MinPowerKwFilter in domain ([49a1a98](https://github.com/ChargeAndTrack/backend-spe/commit/49a1a98459edf05d1a27aafbc79e025ac9c35e28))
+* **llm:** add filters in ClosestChargingStationInput and update getClosestChargingStation query; add filters to search functionality ([6ac731c](https://github.com/ChargeAndTrack/backend-spe/commit/6ac731c7d6005d38265a44ad2866066ed197da56))
+* **llm:** add Hugging Face secret and change application.conf to take secrets from env vars; add env_file configuration in docker-compose.yml ([af67b3e](https://github.com/ChargeAndTrack/backend-spe/commit/af67b3eaaef4deb6877487f6df70d41dbc64ebc4))
+* **llm:** add multiple attempts to LLM request and add 'closest' test ([857b7da](https://github.com/ChargeAndTrack/backend-spe/commit/857b7da253cc60a1f51d34ee610efa91b2ef8117))
+* **llm:** add SearchChargingStationsService, QueryParsingPort and ChargingStationSearchQuery interfaces ([a7e4155](https://github.com/ChargeAndTrack/backend-spe/commit/a7e4155ed8d224765bf0d39801ab4ec2a9e2bafa))
+* **llm:** add validation in MinPowerKwFilter ([9093765](https://github.com/ChargeAndTrack/backend-spe/commit/9093765a58ed1064fa49b1c9ab59e98f3bb21c95))
+
+### Documentation
+
+* **llm:** add LLM openapi ([8f92447](https://github.com/ChargeAndTrack/backend-spe/commit/8f9244767c81e011f92dcf34cadaeed42682c5c6))
+* **location:** add location openapi ([a8e8b29](https://github.com/ChargeAndTrack/backend-spe/commit/a8e8b29e4169ba95139bf976884c927f985f9163))
+
+### Tests
+
+* move some methods from ChargingStationTest to Setup ([124bd58](https://github.com/ChargeAndTrack/backend-spe/commit/124bd58fa03063a3a821fe57efee93fc89926f9c))
+
+### Build and continuous integration
+
+* add setup_env.sh and .env.example, and configure secrets in build-and-test workflow ([695bafe](https://github.com/ChargeAndTrack/backend-spe/commit/695bafeec4bbd7d1bb79463c28998c052511ae8f))
+
+### Refactoring
+
+* add AbstractExternalServiceAdapter, used by NominatimGeocodingAdapter and HuggingFaceQueryParsingAdapter ([f049972](https://github.com/ChargeAndTrack/backend-spe/commit/f04997276d04b38632403395776d67fb7e6467a5))
+* add more LLM configuration parameters in application.conf and refactor Config object adding inner objects ([ebd4345](https://github.com/ChargeAndTrack/backend-spe/commit/ebd4345ce46dbb71bada6461d8b629697175b64f))
+* make onlyEnabled explicitly true by default, add a toDTO method and make locationService public ([a844a43](https://github.com/ChargeAndTrack/backend-spe/commit/a844a439ba0e1caf3c4f268e01cdbe79dbbaac35))
+* rename QueryDTO toInput method as toDomainEntity and add AbstractQueryDTO with template method for validation ([8a8ef87](https://github.com/ChargeAndTrack/backend-spe/commit/8a8ef876b37e5c1577e325446ed8d63b787180cb))
+
 ## [1.0.0](https://github.com/ChargeAndTrack/backend-spe/compare/0.7.0...1.0.0) (2026-03-18)
 
 ### ⚠ BREAKING CHANGES
