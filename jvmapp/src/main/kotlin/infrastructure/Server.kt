@@ -2,7 +2,6 @@ package infrastructure
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
-import com.typesafe.config.ConfigFactory
 import domain.AppException
 import domain.InternalErrorException
 import domain.InvalidInputException
@@ -20,7 +19,6 @@ import io.ktor.server.auth.jwt.JWTAuthenticationProvider
 import io.ktor.server.auth.jwt.JWTCredential
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.jwt.jwt
-import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.statuspages.StatusPages
@@ -28,14 +26,11 @@ import io.ktor.server.response.respond
 import kotlinx.serialization.json.Json
 
 class Server(routing: Application.() -> Unit) {
-    init {
-        loadConfiguration()
-    }
 
     private val server = embeddedServer(
         Netty,
-        host = Config.Deployment.host ?: "0.0.0.0",
-        port = Config.Deployment.port ?: 3000
+        host = Config.Deployment.host,
+        port = Config.Deployment.port
     ) {
         install(ContentNegotiation) {
             json(Json {
@@ -71,18 +66,6 @@ class Server(routing: Application.() -> Unit) {
             exception<AppException> { call, cause -> call.respond(cause.statusCode(), cause.message) }
         }
         routing()
-    }
-
-    private fun loadConfiguration() {
-        val config = HoconApplicationConfig(ConfigFactory.load())
-        Config.Deployment.host = config.property("ktor.deployment.host").getString()
-        Config.Deployment.port = config.property("ktor.deployment.port").getString().toInt()
-        Config.Deployment.rootPath = config.property("ktor.deployment.rootPath").getString()
-        Config.Jwt.secret = config.property("jwt.secret").getString()
-        Config.Llm.hfSecret = config.property("llm.hfSecret").getString()
-        Config.Llm.hfModel = config.property("llm.hfModel").getString()
-        Config.Llm.temperature = config.property("llm.temperature").getString().toDouble()
-        Config.Llm.maxTokens = config.property("llm.maxTokens").getString().toInt()
     }
 
     private fun JWTAuthenticationProvider.Config.configuration(message: String, validation: (JWTCredential) -> Any?) {

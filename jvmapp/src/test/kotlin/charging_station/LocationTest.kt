@@ -5,7 +5,7 @@ import Setup.buildRequest
 import Setup.createClient
 import Setup.loginAndGetToken
 import Setup.userLoginDTO
-import infrastructure.Router.assemblePath
+import infrastructure.Router.Companion.assemblePath
 import infrastructure.charging_station.AddressDTO
 import infrastructure.charging_station.LocationDTO
 import io.kotest.core.spec.style.FunSpec

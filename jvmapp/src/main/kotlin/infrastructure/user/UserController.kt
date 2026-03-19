@@ -1,7 +1,6 @@
 package infrastructure.user
 
 import application.user.UserService
-import application.user.UserServiceImpl
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import infrastructure.Config
@@ -14,8 +13,7 @@ import io.ktor.server.response.*
 import java.util.Date
 import kotlin.time.Duration.Companion.days
 
-class UserController {
-    private val userService: UserService = UserServiceImpl(MongoDbUserRepository())
+class UserController(private val userService: UserService) {
 
     suspend fun login(call: ApplicationCall) {
         val request = call.receive<LoginRequestDTO>()

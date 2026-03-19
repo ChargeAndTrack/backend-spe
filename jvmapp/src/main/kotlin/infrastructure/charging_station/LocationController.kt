@@ -9,7 +9,7 @@ import io.ktor.http.Parameters
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.response.respond
 
-class LocationController(val locationService: LocationService) {
+class LocationController(private val locationService: LocationService) {
 
     suspend fun resolveAddressToLocationCoordinates(call: ApplicationCall) {
         println("resolve")

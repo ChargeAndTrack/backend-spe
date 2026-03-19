@@ -5,7 +5,7 @@ import com.corundumstudio.socketio.SocketIOServer
 
 object Socket {
     private val config = Configuration().apply {
-        hostname = Config.Deployment.host ?: "0.0.0.0"
+        hostname = Config.Deployment.host
         port = 3001
         origin = null
     }

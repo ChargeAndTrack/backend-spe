@@ -1,4 +1,4 @@
-import infrastructure.Router.assemblePath
+import infrastructure.Router.Companion.assemblePath
 import infrastructure.charging_station.AddChargingStationDTO
 import infrastructure.charging_station.ChargingStationDTO
 import infrastructure.user.LoginRequestDTO

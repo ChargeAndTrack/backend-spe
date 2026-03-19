@@ -1,11 +1,8 @@
 package infrastructure.charging_station
 
-import application.charging_station.ActiveRechargeRepositoryImpl
-import application.charging_station.ChargingStationServiceImpl
-import application.charging_station.RechargeServiceImpl
-import application.user.CarServiceImpl
-import infrastructure.Socket
-import infrastructure.user.MongoDbUserRepository
+import application.charging_station.ChargingStationService
+import application.charging_station.RechargeService
+import application.user.CarService
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.auth.jwt.JWTPrincipal
@@ -14,18 +11,11 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import kotlin.random.Random
 
-class RechargeController {
-
-    private val chargingStationService = ChargingStationServiceImpl(MongoDbChargingStationRepository())
-    private val carService = CarServiceImpl(MongoDbUserRepository())
-    val rechargeService = RechargeServiceImpl(
-        MongoDbRechargeRepository(),
-        chargingStationService,
-        carService,
-        SocketIORechargeEventObserver(Socket.server),
-        ActiveRechargeRepositoryImpl()
-    )
-
+class RechargeController(
+    private val rechargeService: RechargeService,
+    private val chargingStationService: ChargingStationService,
+    private val carService: CarService
+) {
     suspend fun startRecharge(call: ApplicationCall) = call.handleRechargeRequest { chargingStationId ->
         println("Start recharge")
         val request = call.receive<StartRechargeDTO>()

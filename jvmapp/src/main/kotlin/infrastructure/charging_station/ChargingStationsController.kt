@@ -1,27 +1,17 @@
 package infrastructure.charging_station
 
-import application.charging_station.ActiveRechargeRepositoryImpl
 import application.charging_station.ChargingStationService
-import application.charging_station.RechargeServiceImpl
-import application.user.CarServiceImpl
-import infrastructure.Socket
-import infrastructure.user.MongoDbUserRepository
+import application.charging_station.RechargeService
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.Parameters
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 
-class ChargingStationsController(val chargingStationService: ChargingStationService) {
-
-    private val rechargeService = RechargeServiceImpl(
-        MongoDbRechargeRepository(),
-        chargingStationService,
-        CarServiceImpl(MongoDbUserRepository()),
-        SocketIORechargeEventObserver(Socket.server),
-        ActiveRechargeRepositoryImpl()
-    )
-
+class ChargingStationsController(
+    private val chargingStationService: ChargingStationService,
+    private val rechargeService: RechargeService
+) {
     suspend fun listChargingStations(call: ApplicationCall) {
         println("Get all charging stations")
         call.respond(

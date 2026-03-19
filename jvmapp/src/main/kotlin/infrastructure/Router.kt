@@ -1,14 +1,10 @@
 package infrastructure
 
-import application.charging_station.ChargingStationServiceImpl
-import application.charging_station.LocationServiceImpl
 import infrastructure.user.CarController
 import infrastructure.charging_station.ChargingStationsController
 import infrastructure.charging_station.LlmController
 import infrastructure.charging_station.RechargeController
 import infrastructure.charging_station.LocationController
-import infrastructure.charging_station.MongoDbChargingStationRepository
-import infrastructure.charging_station.NominatimGeocodingAdapter
 import infrastructure.user.UserController
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.*
@@ -16,23 +12,29 @@ import io.ktor.server.auth.authenticate
 import io.ktor.server.response.respond
 import io.ktor.server.routing.*
 
-object Router {
+class Router(
+    userController: UserController,
+    carController: CarController,
+    chargingStationsController: ChargingStationsController,
+    rechargeController: RechargeController,
+    locationController: LocationController,
+    llmController: LlmController
+) {
+    companion object {
+        fun String.assemblePath(vararg paths: String): String = buildString {
+            append(this@assemblePath)
+            paths.forEach { append("/$it") }
+        }
+    }
+
     val module: Application.() -> Unit = {
-        val chargingStationService = ChargingStationServiceImpl(MongoDbChargingStationRepository())
-        val locationService = LocationServiceImpl(NominatimGeocodingAdapter())
-        val userController = UserController()
-        val chargingStationsController = ChargingStationsController(chargingStationService)
-        val rechargeController = RechargeController()
-        val carController = CarController(rechargeController)
-        val locationController = LocationController(locationService)
-        val llmController = LlmController(chargingStationService, locationService)
         routing {
             get("/health") { call.respond(HttpStatusCode.OK) }
             val chargingStationPath = "/charging-stations"
             val carsPath = "/cars"
             val locationPath = "/location"
             val llmPath = "/llm"
-            route(Config.Deployment.rootPath ?: "api/v1") {
+            route(Config.Deployment.rootPath) {
                 post("/login") { userController.login(call) }
                 authenticate("auth-jwt") {
                     get("/user") { userController.getUser(call) }
@@ -76,10 +78,5 @@ object Router {
                 }
             }
         }
-    }
-
-    fun String.assemblePath(vararg paths: String): String = buildString {
-        append(this@assemblePath)
-        paths.forEach { append("/$it") }
     }
 }

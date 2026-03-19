@@ -1,10 +1,9 @@
 package infrastructure.user
 
+import application.charging_station.RechargeService
 import application.user.CarService
-import application.user.CarServiceImpl
 import domain.InvalidInputException
 import domain.user.Car
-import infrastructure.charging_station.RechargeController
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.auth.jwt.JWTPrincipal
@@ -12,8 +11,7 @@ import io.ktor.server.auth.principal
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 
-class CarController(private val rechargeController: RechargeController) {
-    private val carService: CarService = CarServiceImpl(MongoDbUserRepository())
+class CarController(private val carService: CarService, private val rechargeService: RechargeService) {
 
     suspend fun getCars(call: ApplicationCall) {
         println("getCars")
@@ -31,7 +29,7 @@ class CarController(private val rechargeController: RechargeController) {
         call.respond(
             HttpStatusCode.OK,
             carService.getCar(getUserId(call), carId)
-                .toDTO(rechargeController.rechargeService.getChargingStationIdByCarId(carId))
+                .toDTO(rechargeService.getChargingStationIdByCarId(carId))
         )
     }
 
@@ -47,7 +45,7 @@ class CarController(private val rechargeController: RechargeController) {
     }
 
     private suspend fun Collection<Car>.toRechargingDTO(): Collection<CarRechargingDTO> = map {
-        it.toDTO(rechargeController.rechargeService.getChargingStationIdByCarId(it.id))
+        it.toDTO(rechargeService.getChargingStationIdByCarId(it.id))
     }
 
     private fun getUserId(call: ApplicationCall): String =

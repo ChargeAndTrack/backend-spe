@@ -17,10 +17,6 @@ class HuggingFaceQueryParsingAdapter : AbstractExternalServiceAdapter(), QueryPa
 
     private companion object {
         const val HF_URL = "https://router.huggingface.co/v1/chat/completions"
-        val HF_MODEL = Config.Llm.hfModel ?: "Qwen/Qwen2.5-7B-Instruct:together"
-        val HF_SECRET = Config.Llm.hfSecret ?: throw InternalErrorException("HF secret is required")
-        val DEFAULT_TEMPERATURE = Config.Llm.temperature ?: 0.0
-        val DEFAULT_MAX_TOKENS = Config.Llm.maxTokens ?: 300
         const val PROMPT = """
             You are a charging stations query parser. You have to return ONLY a valid JSON following this schema:
             { "intent": "NEAR" or "CLOSEST", "address": string, "filters"?: { "minPowerKw"?: int } }
@@ -68,12 +64,12 @@ class HuggingFaceQueryParsingAdapter : AbstractExternalServiceAdapter(), QueryPa
     private suspend fun attemptParse(query: String): ChargingStationSearchQuery {
         val rawLLMResponse = client
             .post(HF_URL) {
-                bearerAuth(HF_SECRET)
+                bearerAuth(Config.Llm.hfSecret)
                 contentType(ContentType.Application.Json)
                 setBody(LlmRequest(
-                    model = HF_MODEL,
-                    temperature = DEFAULT_TEMPERATURE,
-                    max_tokens = DEFAULT_MAX_TOKENS,
+                    model = Config.Llm.hfModel,
+                    temperature = Config.Llm.temperature,
+                    max_tokens = Config.Llm.maxTokens,
                     messages = listOf(LlmMessage("system", PROMPT), LlmMessage("user", query))
                 ))
             }.checkStatus()
