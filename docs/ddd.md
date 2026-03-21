@@ -53,7 +53,7 @@ config:
 ---
 classDiagram
     class User {
-        <<interface, entity>>
+        <<interface, aggregate-root>>
         +id: String
         +username: String
         +password: String
@@ -73,7 +73,7 @@ classDiagram
         +currentBattery: Int?
     }
     class ChargingStation {
-        <<interface, entity>>
+        <<interface, aggregate-root>>
         +id: String
         +power: Int
         +available: Boolean
@@ -96,3 +96,20 @@ classDiagram
     Car --> Recharge
     ChargingStation --> Recharge
 ```
+
+Starting from the main concepts shown in the diagram we identified others related models, such as:
+- **domain events**: events that are emitted when something related to the recharges happens in the domain:
+  - _RechargeUpdate_: emitted when during a recharge the battery level of the car is incremented;
+  - _ChargingStationStateUpdated_: emitted when the state of a charging station is updated;
+  - _RechargeCompleted_: emitted when a recharge is completed;
+- **services**: interfaces that define the use cases:
+  - _UserService_: defines the use cases related to the users;
+  - _CarService_: defines the use cases related to the cars;
+  - _ChargingStationService_: defines the use cases related to the charging stations;
+  - _RechargeService_: defines the use cases related to the recharges;
+  - _LocationService_: defines the use cases related to the locations;
+  - _SearchChargingStationService_: defines the use cases related to the search of the charging stations;
+- **repositories**: interfaces that provide storage facilities:
+  - _UserRepository_: provides storage facilities for the users and their cars;
+  - _ChargingStationRepository_: provides storage facilities for the charging stations;
+  - _RechargeRepository_: provides storage facilities for the recharges.

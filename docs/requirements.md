@@ -45,8 +45,8 @@ remove them.
 
 ## Non-Functional Requirements
 
-1. **Portability**: the system should be accessible from a web browsers, through both mobile and desktop devices;
-2. **Usability**: the system should have an intuitive and user-friendly interface, adapting to the device resolution.
+1. _Portability_: the system should be accessible from a web browsers, through both mobile and desktop devices;
+2. _Usability_: the system should have an intuitive and user-friendly interface, adapting to the device resolution.
 
 ## Implementation Requirements
 
