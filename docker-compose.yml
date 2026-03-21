@@ -19,8 +19,8 @@ services:
       - "3000:3000"
       - "3001:3001"
     networks:
-      - esterna
-      - interna
+      - external
+      - internal
 
   mongodb:
     build:
@@ -35,18 +35,18 @@ services:
         mongo --quiet $${host}/test --eval 'quit(db.runCommand({ ping: 1 }).ok ? 0 : 2)' && echo 0 || echo 1
       interval: 5s
     networks:
-      - interna
+      - internal
 
 networks:
-  interna:
+  internal:
     driver: bridge
     internal: true
     driver_opts:
-       com.docker.network.bridge.name: "br-interna89012" 
+       com.docker.network.bridge.name: "br-internal"
        com.docker.network.enable_ipv6: "false"
-  esterna:
+  external:
     driver: bridge
     internal: false
     driver_opts:
-       com.docker.network.bridge.name: "br-esterna89012" 
+       com.docker.network.bridge.name: "br-external"
        com.docker.network.enable_ipv6: "false"
